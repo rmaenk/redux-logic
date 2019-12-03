@@ -7,6 +7,8 @@ Redux middleware that can:
  - **intercept** (validate/transform/augment) actions AND
  - **perform async processing** (fetching, I/O, side effects)
 
+Forked by rmaenk
+
 [![Build Status](https://secure.travis-ci.org/jeffbski/redux-logic.png?branch=master)](http://travis-ci.org/jeffbski/redux-logic) [![Known Vulnerabilities](https://snyk.io/test/github/jeffbski/redux-logic/badge.svg)](https://snyk.io/test/github/jeffbski/redux-logic) [![NPM Version Badge](https://img.shields.io/npm/v/redux-logic.svg)](https://www.npmjs.com/package/redux-logic)
 
 ## tl;dr
