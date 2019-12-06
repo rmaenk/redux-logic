@@ -1,0 +1,9 @@
+{
+    "configurations": [
+        {
+            "name": "Empty",
+            "type": "node",
+            "request": "launch"
+        }
+    ]
+}
