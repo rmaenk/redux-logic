@@ -7,7 +7,16 @@ build-lib
 build-es
 coverage
 _book
+
+### Local files ###
 patch/redux-logic.orig.js
 patch/redux-logic.orig.min.js
 patch/redux-logic.patched.js
 vsTestAdapter/mochaTestAdapterInit.js
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
