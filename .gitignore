@@ -7,3 +7,7 @@ build-lib
 build-es
 coverage
 _book
+patch/redux-logic.orig.js
+patch/redux-logic.orig.min.js
+patch/redux-logic.patched.js
+vsTestAdapter/mochaTestAdapterInit.js

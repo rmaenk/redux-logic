@@ -1,0 +1,6 @@
+--require @babel/register
+--ui bdd
+--timeout 0
+--full-trace
+--inline-diffs
+--colors
