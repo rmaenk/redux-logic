@@ -1696,7 +1696,7 @@ describe('createLogicMiddleware-process', () => {
 
   });
 
-  describe('[logicA] validate=allow process successType=BAR dispatch(42)', () => {
+  describe('[logicA] validate=allow(CAT) process successType=BAR dispatch(42)', () => {
     let monArr = [];
     let mw;
     let logicA;

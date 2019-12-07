@@ -1,4 +1,4 @@
-import { debounceTime, filter, map, mergeMap, share, tap, throttleTime } from 'rxjs/operators';
+import { filter, scan, tap, takeWhile } from 'rxjs/operators';
 
 function createPendingMonitor(monitor$, instanceId, act) {
   let action = act;
@@ -17,15 +17,17 @@ function createPendingMonitor(monitor$, instanceId, act) {
             pending += 1;
             break;
           case 'nextDisp': // action changed type and dispatched
-            pending -= 1;
-            action = x.dispAction; // change context action for this instance of pending monitor
+            pending -= 1; // 'nextDisp' op
+            pending -= 1; // emulate 'bottom' op
+   // TODO: action = x.dispAction; // change context action for this instance of pending monitor
             break;
           case 'next': // action moved in stack to next logic/middleware
             pending -= 1;
             action = x.nextAction; // change context action for this instance of pending monitor
             break;
           case 'filtered': // action filtered
-            pending -= 1;
+            pending -= 1; // 'filtered' op
+            pending -= 1; // emulate 'bottom' op
             break;
           case 'bottom': // action cleared bottom of logic stack
             pending -= 1;
@@ -43,33 +45,36 @@ function createPendingMonitor(monitor$, instanceId, act) {
             break;
         }
 
-        action[`pm${instanceId}`] = instanceId; // NOTE: this is for diagnostics only
+        // action[`pm${instanceId}`] = instanceId; // NOTE: this is for diagnostics only
         return {
           ...x,
           pending,
-          pendingMonitor: instanceId // NOTE: this is for diagnostics only
+          // pendingMonitor: instanceId // NOTE: this is for diagnostics only
         };
       },
       { pending: 1 /* action already at top of logic stack */ }
     ),
-    // tapOp(function (x) { console.log("pendingMonitor$:", x);})
+    // tap(function (x) { console.log("pendingMonitor$:", x);})
   );
 }
 
-export default function createReadyForProcessPromise(monitor$, action) {
+export default function createReadyForProcessPromise({action, logic, monitor$}) {
   const useOld = false;
   if (useOld) return Promise.resolve(0);
 
   const instance = Date.now();
 
   // eslint-disable-next-line no-console
-  console.log('pending monitor instance created:', instance, action, logic);
+  // console.log('pending monitor instance created:', instance,
+  //  'time:', new Date(instance), action, logic);
   const pendingMonitor$ = createPendingMonitor(monitor$, instance, action);
 
   // eslint-disable-next-line no-console
-  console.log('pending:', 1, 'instance=', instance, 'action is already on stack top (pending=1).');
+  // console.log('pending:', 1, 'instance=', instance,
+  //   'action is already on stack top (pending=1).');
   const readyForProcess$ = pendingMonitor$.pipe(
-    tapOp(x => console.log('pending:', x.pending, 'instance=', instance, x)), // eslint-disable-line no-console
+    // eslint-disable-next-line no-console
+    // tap(x => console.log('pending:', x.pending, 'instance=', instance, x)),
     takeWhile(x => x.pending)
   );
   return readyForProcess$.toPromise().then(() => instance);

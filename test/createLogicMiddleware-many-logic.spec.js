@@ -5,12 +5,11 @@ import { createLogic, createLogicMiddleware } from '../src/index';
 
 describe('createLogicMiddleware-many-logic', () => {
   describe('with validate and process', () => {
-    // NOTE: changed from 200 to 165 because the test fails
-    const NUM_LOGICS = 165; // 230 with cancel optimization
+    const NUM_LOGICS = 200; // 230 with cancel optimization
     let mw;
     let store;
 
-    beforeEach(() => {
+    beforeEach((bDone) => {
       const arrLogic = range(0, NUM_LOGICS).map(() => createLogic({
         type: 'foo',
         validate({ action }, allow) {
@@ -43,6 +42,7 @@ describe('createLogicMiddleware-many-logic', () => {
       };
       store = createStore(reducer, undefined, applyMiddleware(mw));
       store.dispatch({ type: 'foo', validates: 0 });
+      mw.whenComplete(bDone);
     });
 
     it('expect state to be updated', () => {
@@ -55,7 +55,7 @@ describe('createLogicMiddleware-many-logic', () => {
     let mw;
     let store;
 
-    beforeEach(() => {
+    beforeEach((bDone) => {
       const arrLogic = range(0, NUM_LOGICS).map(() => createLogic({
         type: 'foo',
         validate({ action }, allow) {
@@ -79,6 +79,7 @@ describe('createLogicMiddleware-many-logic', () => {
       };
       store = createStore(reducer, undefined, applyMiddleware(mw));
       store.dispatch({ type: 'foo', validates: 0 });
+      mw.whenComplete(bDone);
     });
 
     it('expect state to be updated', () => {
@@ -120,7 +121,7 @@ describe('createLogicMiddleware-many-logic', () => {
       };
       store = createStore(reducer, undefined, applyMiddleware(mw));
       store.dispatch({ type: 'foo', validates: 0 });
-      mw.whenComplete(() => bDone());
+      mw.whenComplete(bDone);
     });
 
     it('expect state to be updated', () => {

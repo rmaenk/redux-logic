@@ -10,7 +10,7 @@ import createCancelled$ from './createCancelled$';
 const debug = (/* ...args */) => {};
 
 export default function createLogicAction$({ action, logic, store, deps,
-  cancel$, monitor$, action$ }) {
+  cancel$, monitor$, action$, readyForProcessPromise }) {
   const { getState } = store;
   const { name, process: processFn, processOptions: { dispatchReturn,
     dispatchMultiple, successType, failType } } = logic;
@@ -87,11 +87,16 @@ export default function createLogicAction$({ action, logic, store, deps,
 
       // unless rejected, we will process even if allow/next dispatched
       if (shouldProcessAndHasProcessFn) { // processing, was an accept
-        // if action provided is empty, give process orig
-        depObj.action = act || action;
+        readyForProcessPromise.then(pendingMonitorId => {
+          // if action provided is empty, give process orig
+          depObj.action = act || action;
 
-        execProcessFn({ depObj, dispatch, done, processFn,
-          dispatchReturn, dispatch$, name });
+          execProcessFn({
+            depObj, dispatch, done, processFn,
+            dispatchReturn, dispatch$, name
+          });
+        });
+
       } else { // not processing, must have been a reject
         dispatch$.complete();
       }
@@ -102,8 +107,10 @@ export default function createLogicAction$({ action, logic, store, deps,
       if (act) {
         act$.next(act);  // triggers call to middleware's next()
       }
-      setInterceptComplete();
-      act$.complete();
+      readyForProcessPromise.then(pendingMonitorId => {
+        setInterceptComplete();
+        act$.complete();
+      });
     }
 
     // start use of the action

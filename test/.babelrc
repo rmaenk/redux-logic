@@ -1,5 +1,24 @@
 {
     "sourceMaps": "inline",
     "retainLines": true,
-    "presets": ["@babel/preset-env"]
+    "presets": [
+        [
+            "@babel/preset-env",
+            {
+                "targets": {
+                    "node": true
+                },
+                "modules": "commonjs",
+                "debug": false
+            }
+        ]
+    ],
+    "plugins": [
+        [
+            "@babel/plugin-transform-runtime",
+            {
+                "regenerator": true
+            }
+        ]
+    ],
 }

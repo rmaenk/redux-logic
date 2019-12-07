@@ -1,5 +1,5 @@
 import { Subject, BehaviorSubject } from 'rxjs';
-import { filter, map, scan, takeWhile } from 'rxjs/operators';
+import { filter, map, scan, takeWhile, tap } from 'rxjs/operators';
 import wrapper from './logicWrapper';
 import { identityFn, stringifyType } from './utils';
 
@@ -35,7 +35,11 @@ export default function createLogicMiddleware(arrLogic = [], deps = {}) {
   }
 
   const actionSrc$ = new Subject(); // mw action stream
+//  actionSrc$.subscribe(a => console.log("actionSrc$:",a));
+
   const monitor$ = new Subject(); // monitor all activity
+//  monitor$.subscribe(x => console.log('monitor$:', x));
+
   const lastPending$ = new BehaviorSubject({ op: OP_INIT });
   monitor$.pipe(
     scan((acc, x) => { // append a pending logic count
@@ -111,8 +115,9 @@ export default function createLogicMiddleware(arrLogic = [], deps = {}) {
     return lastPending$.pipe(
       // tap(x => console.log('wc', x)), /* keep commented out */
       takeWhile(x => x.pending),
-      map((/* x */) => undefined) // not passing along anything
     ).toPromise()
+       // complete caller code first, then callback
+      .then(() => new Promise((resolve) => { setTimeout(resolve, 0); }))
       .then(fn);
   };
 
