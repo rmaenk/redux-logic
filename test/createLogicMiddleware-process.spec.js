@@ -4119,7 +4119,7 @@ describe('createLogicMiddleware-process', () => {
 
   });
 
-  describe('[logicA] process successType=fn return promise 42', () => {
+  describe('[logicA] process successType=fn return promise 42 [TODO: should be return promise undefined]', () => {
     let monArr = [];
     let mw;
     let logicA;
@@ -5075,7 +5075,7 @@ describe('createLogicMiddleware-process', () => {
 
   });
 
-  describe('[logicA] process failType=BAZ return error obs 32', () => {
+  describe('[logicA] process failType=BAZ throw string', () => {
     let monArr = [];
     let mw;
     let logicA;
@@ -5341,7 +5341,7 @@ describe('createLogicMiddleware-process', () => {
 
   });
 
-  describe('[logicA] process failType=fnUnd throw error', () => {
+  describe('[logicA] process failType=fnUnd throw string', () => {
     let monArr = [];
     let mw;
     let logicA;
@@ -5520,7 +5520,7 @@ describe('createLogicMiddleware-process', () => {
 
   });
 
-  describe('[logicA] process failType=fn return rejecting promise 32', () => {
+  describe('[logicA] process failType=fn return rejecting promise 32 [TODO: should be return promise undefined]', () => {
     let monArr = [];
     let mw;
     let logicA;
