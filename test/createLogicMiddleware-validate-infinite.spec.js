@@ -1,6 +1,4 @@
-import { beforeEach, afterEach } from 'mocha';
-import { Observable, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { before, after } from 'mocha';
 import expect from 'expect-legacy';
 import { createLogic, createLogicMiddleware } from '../src/index';
 
@@ -13,6 +11,7 @@ const TERMINATE_TIMEOUT = 50; // in ms
 describe('createLogicMiddleware-validate-infinite', () => {
   describe('[logicA*]', () => {
     describe('validateA=|no allow/reject| processA=dispatch(BAR, A)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -30,9 +29,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
-          validate(deps, allow /* , reject */) {
+          validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarA);
@@ -42,7 +41,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -70,8 +69,13 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
     });
     describe('validateA=|async no allow/reject| processA=dispatch(BAR, A)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -89,9 +93,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
-          async validate(deps, allow /* , reject */) {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarA);
@@ -101,7 +105,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -129,10 +133,16 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
     });
   });
   describe('[logicA]', () => {
     describe('validateA=|no allow/reject| processA=dispatch(BAR, A)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -150,9 +160,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
-          validate(deps, allow /* , reject */) {
+          validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarA);
@@ -162,7 +172,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -190,8 +200,13 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
     });
     describe('validateA=|async no allow/reject| processA=dispatch(BAR, A)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -209,9 +224,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
-          async validate(deps, allow /* , reject */) {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarA);
@@ -221,7 +236,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -249,10 +264,15 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
     });
   });
   describe('[logicA*, logicB*]', () => {
     describe('validateA=absent validateB=|no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -272,7 +292,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
           process(deps, dispatch, done) {
             dispatch(actionBarA);
             done();
@@ -281,9 +300,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: '*',
-          warnTimeout: 0,
-          validate: (deps, allow /* , reject */) => {
+          validate: (deps, allow, reject) => {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -293,7 +312,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -323,9 +342,14 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
     });
 
     describe('validateA=absent validateB=|async no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -345,7 +369,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
           process(deps, dispatch, done) {
             dispatch(actionBarA);
             done();
@@ -354,9 +377,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: '*',
-          warnTimeout: 0,
-          validate: async (deps, allow /* , reject */) => {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -366,7 +389,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -396,10 +419,15 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
 
     });
 
     describe('validateA=allow(FOO) validateB=|no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -419,7 +447,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -431,9 +458,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: '*',
-          warnTimeout: 0,
-          validate: (deps, allow /* , reject */) => {
+          validate: (deps, allow, reject) => {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -443,7 +470,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -473,9 +500,14 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
     });
 
     describe('validateA=allow(FOO) validateB=|async no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -495,7 +527,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -507,9 +538,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: '*',
-          warnTimeout: 0,
-          validate: async (deps, allow /* , reject */) => {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -519,7 +550,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -549,6 +580,10 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
 
     });
 
@@ -556,6 +591,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
 
   describe('[logicA*, logicB]', () => {
     describe('validateA=absent validateB=|no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -575,7 +611,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
           process(deps, dispatch, done) {
             dispatch(actionBarA);
             done();
@@ -584,9 +619,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: 'FOO',
-          warnTimeout: 0,
-          validate: (deps, allow /* , reject */) => {
+          validate: (deps, allow, reject) => {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -596,7 +631,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -626,9 +661,15 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
     describe('validateA=absent validateB=|async no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -648,7 +689,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
           process(deps, dispatch, done) {
             dispatch(actionBarA);
             done();
@@ -657,9 +697,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: 'FOO',
-          warnTimeout: 0,
-          validate: async (deps, allow /* , reject */) => {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -669,7 +709,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -699,9 +739,14 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
     });
 
     describe('validateA=allow(FOO) validateB=|no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -721,7 +766,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -733,9 +777,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: 'FOO',
-          warnTimeout: 0,
-          validate: (deps, allow /* , reject */) => {
+          validate: (deps, allow, reject) => {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -745,7 +789,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -775,9 +819,14 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
     });
 
     describe('validateA=allow(FOO) validateB=|async no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -797,7 +846,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: '*',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -809,9 +857,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: 'FOO',
-          warnTimeout: 0,
-          validate: async (deps, allow /* , reject */) => {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -821,7 +869,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -851,12 +899,18 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
   });
 
   describe('[logicA, logicB*]', () => {
     describe('validateA=absent validateB=|no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -876,7 +930,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
           process(deps, dispatch, done) {
             dispatch(actionBarA);
             done();
@@ -885,9 +938,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: '*',
-          warnTimeout: 0,
-          validate: (deps, allow /* , reject */) => {
+          validate: (deps, allow, reject) => {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -897,7 +950,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -927,9 +980,15 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
     describe('validateA=absent validateB=|async no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -949,7 +1008,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -961,9 +1019,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: '*',
-          warnTimeout: 0,
-          validate: async (deps, allow /* , reject */) => {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -973,7 +1031,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -1003,9 +1061,15 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
     describe('validateA=allow(FOO) validateB=|no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -1025,7 +1089,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -1037,9 +1100,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: '*',
-          warnTimeout: 0,
-          validate: (deps, allow /* , reject */) => {
+          validate: (deps, allow, reject) => {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -1049,7 +1112,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -1079,10 +1142,16 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
 
     describe('validateA=allow(FOO) validateB=|async no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -1102,7 +1171,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -1114,9 +1182,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: '*',
-          warnTimeout: 0,
-          validate: async (deps, allow /* , reject */) => {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -1126,7 +1194,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -1156,12 +1224,18 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
   });
 
   describe('[logicA, logicB]', () => {
     describe('validateA=absent validateB=|no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -1181,7 +1255,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
           process(deps, dispatch, done) {
             dispatch(actionBarA);
             done();
@@ -1190,9 +1263,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: 'FOO',
-          warnTimeout: 0,
-          validate: (deps, allow /* , reject */) => {
+          validate: (deps, allow, reject) => {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -1202,7 +1275,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -1232,9 +1305,15 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
     describe('validateA=absent validateB=|async no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -1262,9 +1341,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: 'FOO',
-          warnTimeout: 0,
-          validate: async (deps, allow /* , reject */) => {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -1274,7 +1353,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -1304,9 +1383,15 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
     describe('validateA=allow(FOO) validateB=|no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -1326,7 +1411,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -1338,9 +1422,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: 'FOO',
-          warnTimeout: 0,
-          validate: (deps, allow /* , reject */) => {
+          validate: (deps, allow, reject) => {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -1350,7 +1434,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -1380,9 +1464,15 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
 
     describe('validateA=allow(FOO) validateB=|async no allow/reject| processA=dispatch(BAR, A) processB=dispatch(BAR, B)', () => {
+      let dispose;
       let monArr = [];
       let mw;
       let logicA;
@@ -1402,7 +1492,6 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicA = createLogic({
           name: 'logicA',
           type: 'FOO',
-          warnTimeout: 0,
           validate(deps, allow /* , reject */) {
             allow(actionFoo);
           },
@@ -1414,9 +1503,9 @@ describe('createLogicMiddleware-validate-infinite', () => {
         logicB = createLogic({
           name: 'logicB',
           type: 'FOO',
-          warnTimeout: 0,
-          validate: async (deps, allow /* , reject */) => {
+          async validate(deps, allow, reject) {
             // do not call allow/reject here
+            dispose = reject;
           },
           process(deps, dispatch, done) {
             dispatch(actionBarB);
@@ -1426,7 +1515,7 @@ describe('createLogicMiddleware-validate-infinite', () => {
         mw = createLogicMiddleware([logicA, logicB]);
         mw.monitor$.subscribe(x => { monArr.push(x); });
         mw({ dispatch })(next)(actionFoo);
-        mw.whenComplete(bDone);
+
         // stop infinite awaiting after TERMINATE_TIMEOUT ms and check
         setTimeout(bDone, TERMINATE_TIMEOUT);
       });
@@ -1456,6 +1545,11 @@ describe('createLogicMiddleware-validate-infinite', () => {
           mw.whenComplete(whenComplete);
           expect(whenComplete.calls.length).toBe(0);
         });
+      after(() => {
+        // release internal observable for pending monitors
+        dispose(undefined);
+      });
+
     });
   });
 });
