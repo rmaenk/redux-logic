@@ -58,7 +58,6 @@ export default function logicWrapper(logic, store, deps, monitor$) {
           readyForProcessPromise.then(pendingMonitorId => {
             setInterceptComplete();
             execProcessFn({ depObj, dispatch, dispatch$, dispatchReturn, done, name, processFn });
-          
           });
         });
 
