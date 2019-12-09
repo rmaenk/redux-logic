@@ -1,5 +1,5 @@
 {
-  "name": "redux-logic",
+  "name": "@rmaenk/redux-logic",
   "version": "2.1.1-arfph.1",
   "description": "Redux middleware for organizing all your business logic. Intercept actions and perform async processing.",
   "main": "build-lib/index.js",
@@ -52,7 +52,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jeffbski/redux-logic.git"
+    "url": "https://github.com/rmaenk/redux-logic.git"
   },
   "keywords": [
     "redux",
@@ -113,7 +113,7 @@
     "webpack": "^4.17.1",
     "webpack-command": "^0.4.1"
   },
-  "npmName": "redux-logic",
+  "npmName": "@rmaenk/redux-logic",
   "npmFileMap": [
     {
       "basePath": "/dist/",
