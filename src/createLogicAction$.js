@@ -87,10 +87,10 @@ export default function createLogicAction$({ action, logic, store, deps,
 
       // unless rejected, we will process even if allow/next dispatched
       if (shouldProcessAndHasProcessFn) { // processing, was an accept
-        readyForProcessPromise.then(pendingMonitorId => {
-          // if action provided is empty, give process orig
-          depObj.action = act || action;
+        // if action provided is empty, give process orig
+        depObj.action = act || action;
 
+        readyForProcessPromise.then(pendingMonitorId => {
           execProcessFn({
             depObj, dispatch, done, processFn,
             dispatchReturn, dispatch$, name
@@ -98,9 +98,11 @@ export default function createLogicAction$({ action, logic, store, deps,
         });
 
       } else { // not processing, must have been a reject
-        dispatch$.complete();
+        readyForProcessPromise.then(pendingMonitorId => {
+          dispatch$.complete();
+        });
       }
-    }
+  }
 
     /* post if defined, then complete */
     function postIfDefinedOrComplete(act, act$) {

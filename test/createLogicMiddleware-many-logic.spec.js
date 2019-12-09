@@ -51,11 +51,11 @@ describe('createLogicMiddleware-many-logic', () => {
   });
 
   describe('with validate', () => {
-    const NUM_LOGICS = 300; // 370 with cancel optimization
+    const NUM_LOGICS = 250; // 370 with cancel optimization
     let mw;
     let store;
 
-    beforeEach((bDone) => {
+    before((bDone) => {
       const arrLogic = range(0, NUM_LOGICS).map(() => createLogic({
         type: 'foo',
         validate({ action }, allow) {

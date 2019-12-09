@@ -56,10 +56,9 @@ export default function logicWrapper(logic, store, deps, monitor$) {
           const ctx = {}; // no intercept, so empty ctx;
           const depObj = createDepObject({ deps, cancelled$, ctx, getState, action, action$ });
           readyForProcessPromise.then(pendingMonitorId => {
-            asapScheduler.schedule(() => {
-              setInterceptComplete();
-              execProcessFn({ depObj, dispatch, dispatch$, dispatchReturn, done, name, processFn });
-            });
+            setInterceptComplete();
+            execProcessFn({ depObj, dispatch, dispatch$, dispatchReturn, done, name, processFn });
+          
           });
         });
 
