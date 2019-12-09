@@ -1,6 +1,4 @@
-import { beforeEach, afterEach } from 'mocha';
-import { Observable, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { before, after } from 'mocha';
 import expect from 'expect-legacy';
 import { createLogic, createLogicMiddleware } from '../src/index';
 
@@ -420,14 +418,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -496,14 +495,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -574,14 +574,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -656,14 +657,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -737,14 +739,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -819,14 +822,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -898,14 +902,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -974,14 +979,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1052,14 +1058,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1134,14 +1141,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1215,14 +1223,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1297,14 +1306,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1376,14 +1386,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1452,14 +1463,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1530,14 +1542,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1612,14 +1625,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1693,14 +1707,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1775,14 +1790,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1852,17 +1868,18 @@ describe('createLogicMiddleware-validate-async', () => {
           expect(next.calls[0].arguments[0]).toEqual(actionFoo);
         });
 
-      it('dispatches { type: BAR-A } { type: BAR-B }',
+      it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -1932,14 +1949,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2010,14 +2028,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2089,17 +2108,18 @@ describe('createLogicMiddleware-validate-async', () => {
           expect(next.calls[0].arguments[0]).toEqual(actionFoo);
         });
 
-      it('dispatches { type: BAR-A } { type: BAR-B }',
+      it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2173,14 +2193,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2255,14 +2276,15 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(2);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2346,15 +2368,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2435,18 +2458,19 @@ describe('createLogicMiddleware-validate-async', () => {
           expect(next.calls[0].arguments[0]).toEqual(actionFoo);
         });
 
-      it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
+      it('dispatches { type: BAR-A } { type: BAR-B } { type: BAR-B }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2531,15 +2555,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2628,15 +2653,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2723,15 +2749,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2819,15 +2846,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -2916,15 +2944,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -3011,15 +3040,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -3107,15 +3137,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -3207,15 +3238,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -3305,15 +3337,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
@@ -3404,15 +3437,16 @@ describe('createLogicMiddleware-validate-async', () => {
       it('dispatches { type: BAR-C } { type: BAR-B } { type: BAR-A }',
         () => {
           expect(dispatch.calls.length).toBe(3);
-          expect(dispatch.calls[0].arguments[0]).toEqual(actionBarC);
-          expect(dispatch.calls[1].arguments[0]).toEqual(actionBarB);
-          expect(dispatch.calls[2].arguments[0]).toEqual(actionBarA);
+          expect(dispatch.calls.map(c => c.arguments[0])).toEqual([
+            actionBarC,
+            actionBarB,
+            actionBarA
+          ]);
         });
 
       it('mw.monitor$ should track flow',
         () => {
-          const testArr = [...monArr];
-          expect(testArr).toEqual([
+          expect(monArr).toEqual([
             { action: { type: 'FOO' }, op: 'top' },
             { action: { type: 'FOO' }, op: 'begin', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
