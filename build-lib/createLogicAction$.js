@@ -200,9 +200,9 @@ function createLogicAction$(_ref) {
 
       if (shouldProcessAndHasProcessFn) {
         // processing, was an accept
+        // if action provided is empty, give process orig
+        depObj.action = act || action;
         readyForProcessPromise.then(function (pendingMonitorId) {
-          // if action provided is empty, give process orig
-          depObj.action = act || action;
           (0, _execProcessFn.default)({
             depObj: depObj,
             dispatch: dispatch,
@@ -215,7 +215,9 @@ function createLogicAction$(_ref) {
         });
       } else {
         // not processing, must have been a reject
-        dispatch$.complete();
+        readyForProcessPromise.then(function (pendingMonitorId) {
+          dispatch$.complete();
+        });
       }
     }
     /* post if defined, then complete */

@@ -116,17 +116,15 @@ export default function logicWrapper(logic, store, deps, monitor$) {
         action$: action$
       });
       readyForProcessPromise.then(function (pendingMonitorId) {
-        asapScheduler.schedule(function () {
-          setInterceptComplete();
-          execProcessFn({
-            depObj: depObj,
-            dispatch: dispatch,
-            dispatch$: dispatch$,
-            dispatchReturn: dispatchReturn,
-            done: done,
-            name: name,
-            processFn: processFn
-          });
+        setInterceptComplete();
+        execProcessFn({
+          depObj: depObj,
+          dispatch: dispatch,
+          dispatch$: dispatch$,
+          dispatchReturn: dispatchReturn,
+          done: done,
+          name: name,
+          processFn: processFn
         });
       });
     });

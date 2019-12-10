@@ -140,17 +140,15 @@ function logicWrapper(logic, store, deps, monitor$) {
         action$: action$
       });
       readyForProcessPromise.then(function (pendingMonitorId) {
-        _rxjs.asapScheduler.schedule(function () {
-          setInterceptComplete();
-          (0, _execProcessFn.default)({
-            depObj: depObj,
-            dispatch: dispatch,
-            dispatch$: dispatch$,
-            dispatchReturn: dispatchReturn,
-            done: done,
-            name: name,
-            processFn: processFn
-          });
+        setInterceptComplete();
+        (0, _execProcessFn.default)({
+          depObj: depObj,
+          dispatch: dispatch,
+          dispatch$: dispatch$,
+          dispatchReturn: dispatchReturn,
+          done: done,
+          name: name,
+          processFn: processFn
         });
       });
     });
