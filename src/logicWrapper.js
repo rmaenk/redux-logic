@@ -1,5 +1,5 @@
-import { Observable, merge, asapScheduler } from 'rxjs';
-import { debounceTime, filter, map, mergeMap, share, tap, throttleTime, scan } from 'rxjs/operators';
+import { merge, asapScheduler } from 'rxjs';
+import { debounceTime, filter, mergeMap, share, tap, throttleTime, scan } from 'rxjs/operators';
 import createLogicAction$ from './createLogicAction$';
 import { identityFn } from './utils';
 import createDispatch from './createDispatch';
@@ -10,7 +10,7 @@ import createReadyForProcessPromise from './createReadyForProcessPromise';
 
 const MATCH_ALL_TYPES = '*';
 
-export default function logicWrapper(logic, store, deps, monitor$) {
+export default function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
   const { name, type, cancelType, latest, debounce, throttle,
     process: processFn, processOptions: { dispatchReturn}} = logic;
 
@@ -37,14 +37,14 @@ export default function logicWrapper(logic, store, deps, monitor$) {
     const mergeMapOrTap =
       (hasIntercept) ?
         mergeMap(action => {
-          var readyForProcessPromise = createReadyForProcessPromise({action, logic, monitor$});
+          var readyForProcessPromise = createReadyForProcessPromise({action, logic, monitor$, asyncValidateHookOptions});
           return createLogicAction$({
             action, logic, store, deps, cancel$, monitor$, action$, readyForProcessPromise
           });
         }) :
         tap(action => {
           // create promise before monitor$.next calls!
-          var readyForProcessPromise = createReadyForProcessPromise({action, logic, monitor$});
+          var readyForProcessPromise = createReadyForProcessPromise({action, logic, monitor$, asyncValidateHookOptions});
           // mimic the events as if went through createLogicAction$
           // also in createLogicAction$
           monitor$.next({ action, name, op: 'begin' });
@@ -55,9 +55,21 @@ export default function logicWrapper(logic, store, deps, monitor$) {
             action, cancel$, cancelled$, logic, monitor$, store });
           const ctx = {}; // no intercept, so empty ctx;
           const depObj = createDepObject({ deps, cancelled$, ctx, getState, action, action$ });
-          readyForProcessPromise.then(pendingMonitorId => {
+
+          function execWhenReady(fn) {
+            if (readyForProcessPromise) {
+              readyForProcessPromise.then((skip) => fn(skip));
+            } else {
+              asapScheduler.schedule(() => {
+                fn();
+              });
+            }
+          }
+          execWhenReady((skip) => {
             setInterceptComplete();
-            execProcessFn({ depObj, dispatch, dispatch$, dispatchReturn, done, name, processFn });
+            if (!skip) {
+              execProcessFn({ depObj, dispatch, dispatch$, dispatchReturn, done, name, processFn });
+            }
           });
         });
 

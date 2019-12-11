@@ -1,15 +1,16 @@
-import { filter, scan, tap, takeWhile } from 'rxjs/operators';
+import { filter, scan, tap, first } from 'rxjs/operators';
 import { identityFn } from './utils';
 
-function createPendingMonitor({ act, logicName, monitor$, instanceId }) {
+function createPendingMonitor({
+  act, logicName, monitor$, instanceId, reverseOrderOfProcessHooks }) {
   const actions = [act];
   return monitor$.pipe(
     filter(x => actions.some(a => a === x.action || (a === x.nextAction && x.op === 'bottom'))),
     scan(
       (acc, x) => {
-        const reverseOrderOfProcessHooks = true;
         // append a pending logic count
-        var pending = acc.pending || 0;
+        var pending = acc.pending;
+        var stop = acc.stop;
         // eslint-disable-next-line default-case
         switch (x.op) {
           case 'top': // action at top of logic stack
@@ -62,25 +63,30 @@ function createPendingMonitor({ act, logicName, monitor$, instanceId }) {
         return {
           ...x,
           pending,
+          stop
           // pendingMonitor: instanceId // NOTE: this is for diagnostics only
         };
       },
-      { pending: 1 /* action already at top of logic stack */ }
+      { pending: 1 /* action already at top of logic stack */, stop: false }
     ),
     // tap(function (x) { console.log("pendingMonitor$:", x);})
   );
 }
 
-export default function createReadyForProcessPromise({ action, logic, monitor$ }) {
-  const useOld = false;
-  if (useOld) return Promise.resolve(0);
+export default function createReadyForProcessPromise({
+  action, logic, monitor$, asyncValidateHookOptions }) {
+  if (!asyncValidateHookOptions.enable) return null;
 
   const instance = Date.now();
 
+  const reverseOrderOfProcessHooks = !asyncValidateHookOptions.enable
+    || !asyncValidateHookOptions.directOrderOfProcessHooks;
   const pendingMonitor$ =
-    createPendingMonitor({ act: action, logicName: logic.name, monitor$, instance });
+    createPendingMonitor({
+      act: action, logicName: logic.name, monitor$, instance, reverseOrderOfProcessHooks
+    });
 
-  const showTrace = false;
+  const showTrace = true;
   if (showTrace) {
     // eslint-disable-next-line no-console
     console.log('-->',
@@ -107,8 +113,12 @@ export default function createReadyForProcessPromise({ action, logic, monitor$ }
         '\n\ttime:', new Date(instance).toISOString(),
         '\n\tentry:', JSON.stringify(x),
         '<--')) : null,
-      takeWhile(x => x.pending)
+
+      first(x => x.pending <= 0 || x.stop)
     ].filter(identityFn)
   );
-  return readyForProcess$.toPromise().then(() => instance);
+  return readyForProcess$.toPromise().then((x) => {
+    // skip flag for process hooks
+    return x.stop;
+  });
 }
