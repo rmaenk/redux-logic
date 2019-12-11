@@ -139,7 +139,7 @@ export default function createReadyForProcessPromise({
       complete() {
         if (showTrace) {
           // eslint-disable-next-line no-console
-          console.log('readyForProcess$ complete', 'instance:', instance);
+          console.log('readyForProcess$ complete', 'instance:', instance, 'result:', result);
         }
         resolve(result);
         resolved = true;
