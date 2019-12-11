@@ -6,30 +6,30 @@ import { identityFn, stringifyType } from './utils';
 const debug = (/* ...args */) => {};
 const OP_INIT = 'init'; // initial monitor op before anything else
 
-  /**
-   * Options for controlling "asynchronous validation hook in chained logics" feature.
-   * @typedef AsyncValidateHookOptions
-   * @type {object}
-   * @property {boolean} enable 
-   * Indicates whether the asynchronous calls of allow/reject validation hook callbacks
-   *  is supported in chained logics.
-   * Default value is true.
-   * @property {boolean} directOrderOfProcessHooks Defines execution order of process hooks.
-   * Default value is false:
-   *  the execution order is the opposite of execution order of validate hooks.
-   * Direct execution order requires to set "enable" and this property to true.
-   */
-  /** 
-   * @type {AsyncValidateHookOptions} 
-   * */
-  const asyncValidateHookOptions = { enable: true, directOrderOfProcessHooks: false };
-  /**
-   * Shows "asynchronous validation hook in chained logics" feature options.
-   * @returns {AsyncValidateHookOptions} cloned options. Only for readonly use.
-   */
-  export function viewAsyncValidateHookOptions() {
-    return {...asyncValidateHookOptions};
-  } 
+/**
+ * Options for controlling "asynchronous validation hook in chained logics" feature.
+ * @typedef AsyncValidateHookOptions
+ * @type {object}
+ * @property {boolean} enable
+ * Indicates whether the asynchronous calls of allow/reject validation hook callbacks
+ *  is supported in chained logics.
+ * Default value is true.
+ * @property {boolean} directOrderOfProcessHooks Defines execution order of process hooks.
+ * Default value is false:
+ *  the execution order is the opposite of execution order of validate hooks.
+ * Direct execution order requires to set "enable" and this property to true.
+ */
+/**
+ * @type {AsyncValidateHookOptions}
+ * */
+const asyncValidateHookOptions = { enable: true, directOrderOfProcessHooks: false };
+/**
+ * Shows "asynchronous validation hook in chained logics" feature options.
+ * @returns {AsyncValidateHookOptions} cloned options. Only for readonly use.
+ */
+export function viewAsyncValidateHookOptions() {
+  return { ...asyncValidateHookOptions };
+}
 
 /**
    Builds a redux middleware for handling logic (created with

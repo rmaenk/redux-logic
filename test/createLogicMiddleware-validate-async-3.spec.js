@@ -1841,7 +1841,8 @@ describe('createLogicMiddleware-validate-async-3', () => {
       { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
       { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR-A' } },
       { action: { type: 'FOO' }, op: 'end', name: 'logicA' }
-    ]
+    ];
+
     describe('validateA=absent validateB=|timeout(50) reject(FOO)| validateC=absent processA=dispatch(BAR-A) processB=dispatch(BAR-B) processC=dispatch(BAR-C)', () => {
       let monArr = [];
       let mw;
@@ -1866,7 +1867,7 @@ describe('createLogicMiddleware-validate-async-3', () => {
           name: 'logicB',
           type: 'FOO',
           warnTimeout: 0,
-          validate(deps, allow , reject) {
+          validate(deps, allow, reject) {
             setTimeout(() => {
               reject(actionFoo);
             }, 50);
@@ -2747,7 +2748,8 @@ describe('createLogicMiddleware-validate-async-3', () => {
       { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
       { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR-A' } },
       { action: { type: 'FOO' }, op: 'end', name: 'logicA' }
-    ]
+    ];
+
     describe('validateA=absent validateB=|timeout(50) reject(undefined)| validateC=absent processA=dispatch(BAR-A) processB=dispatch(BAR-B) processC=dispatch(BAR-C)', () => {
       let monArr = [];
       let mw;
@@ -2772,7 +2774,7 @@ describe('createLogicMiddleware-validate-async-3', () => {
           name: 'logicB',
           type: 'FOO',
           warnTimeout: 0,
-          validate(deps, allow , reject) {
+          validate(deps, allow, reject) {
             setTimeout(() => {
               reject(undefined);
             }, 50);

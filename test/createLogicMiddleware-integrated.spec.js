@@ -349,7 +349,7 @@ describe('createLogicMiddleware-integration', () => {
           }
         },
         process({ action }, dispatch, done) {
-          dispatch({ type: `BAR-${action.type}` })
+          dispatch({ type: `BAR-${action.type}` });
           done();
         }
       });
@@ -442,7 +442,7 @@ describe('createLogicMiddleware-integration', () => {
     });
   });
 
-  describe('sequential dispatches of actions from logic process then handled by other logics', ()=> {
+  describe('sequential dispatches of actions from logic process then handled by other logics', () => {
     const asyncValidateHookOptions =  viewAsyncValidateHookOptions();
     let storeUpdates;
     let monArr = [];
@@ -489,7 +489,6 @@ describe('createLogicMiddleware-integration', () => {
         type: 'ONE',
         name: 'logic1',
         validate({ action }, allow) {
-          //setTimeout(() => allow(action), 50);
           allow(action);
         },
         process(deps, dispatch, done) {
@@ -501,7 +500,6 @@ describe('createLogicMiddleware-integration', () => {
         type: 'TWO',
         name: 'logic2',
         validate({ action }, allow) {
-          //setTimeout(() => allow(action), 50);
           allow(action);
         },
         process(deps, dispatch, done) {
@@ -720,5 +718,5 @@ describe('createLogicMiddleware-integration', () => {
     });
 
   });
-  
+
 });

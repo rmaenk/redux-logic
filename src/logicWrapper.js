@@ -37,14 +37,16 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
     const mergeMapOrTap =
       (hasIntercept) ?
         mergeMap(action => {
-          var readyForProcessPromise = createReadyForProcessPromise({action, logic, monitor$, asyncValidateHookOptions});
+          var readyForProcessPromise =
+            createReadyForProcessPromise({ action, logic, monitor$, asyncValidateHookOptions });
           return createLogicAction$({
             action, logic, store, deps, cancel$, monitor$, action$, readyForProcessPromise
           });
         }) :
         tap(action => {
           // create promise before monitor$.next calls!
-          var readyForProcessPromise = createReadyForProcessPromise({action, logic, monitor$, asyncValidateHookOptions});
+          var readyForProcessPromise =
+            createReadyForProcessPromise({ action, logic, monitor$, asyncValidateHookOptions });
           // mimic the events as if went through createLogicAction$
           // also in createLogicAction$
           monitor$.next({ action, name, op: 'begin' });
@@ -57,7 +59,7 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
           const depObj = createDepObject({ deps, cancelled$, ctx, getState, action, action$ });
 
           function execWhenReady(fn) {
-            let isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
+            const isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
             if (isReady) {
               asapScheduler.schedule(() => {
                 fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
