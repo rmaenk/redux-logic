@@ -49,7 +49,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var MATCH_ALL_TYPES = '*';
 
-function logicWrapper(logic, store, deps, monitor$) {
+function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
   var name = logic.name,
       type = logic.type,
       cancelType = logic.cancelType,
@@ -74,7 +74,8 @@ function logicWrapper(logic, store, deps, monitor$) {
       var readyForProcessPromise = (0, _createReadyForProcessPromise.default)({
         action: action,
         logic: logic,
-        monitor$: monitor$
+        monitor$: monitor$,
+        asyncValidateHookOptions: asyncValidateHookOptions
       });
       return (0, _createLogicAction$.default)({
         action: action,
@@ -91,7 +92,8 @@ function logicWrapper(logic, store, deps, monitor$) {
       var readyForProcessPromise = (0, _createReadyForProcessPromise.default)({
         action: action,
         logic: logic,
-        monitor$: monitor$
+        monitor$: monitor$,
+        asyncValidateHookOptions: asyncValidateHookOptions
       }); // mimic the events as if went through createLogicAction$
       // also in createLogicAction$
 
@@ -139,17 +141,35 @@ function logicWrapper(logic, store, deps, monitor$) {
         action: action,
         action$: action$
       });
-      readyForProcessPromise.then(function (pendingMonitorId) {
+
+      function execWhenReady(fn) {
+        var isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
+
+        if (isReady) {
+          _rxjs.asapScheduler.schedule(function () {
+            fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
+          });
+        } else {
+          readyForProcessPromise.then(function (skip) {
+            fn(skip);
+          });
+        }
+      }
+
+      execWhenReady(function (skip) {
         setInterceptComplete();
-        (0, _execProcessFn.default)({
-          depObj: depObj,
-          dispatch: dispatch,
-          dispatch$: dispatch$,
-          dispatchReturn: dispatchReturn,
-          done: done,
-          name: name,
-          processFn: processFn
-        });
+
+        if (!skip) {
+          (0, _execProcessFn.default)({
+            depObj: depObj,
+            dispatch: dispatch,
+            dispatch$: dispatch$,
+            dispatchReturn: dispatchReturn,
+            done: done,
+            name: name,
+            processFn: processFn
+          });
+        }
       });
     });
 

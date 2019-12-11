@@ -23,7 +23,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 import isPromise from 'is-promise';
 import { Subject, from, of, throwError, isObservable } from 'rxjs';
-import { defaultIfEmpty, tap, filter, map, mergeAll, takeUntil } from 'rxjs/operators';
+import { tap, mergeAll, takeUntil } from 'rxjs/operators';
 import { identityFn, isInterceptAction, unwrapInterceptAction } from './utils';
 var UNHANDLED_LOGIC_ERROR = 'UNHANDLED_LOGIC_ERROR'; // returns { dispatch, dispatch$, done };
 

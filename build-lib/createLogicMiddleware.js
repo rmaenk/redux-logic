@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.viewAsyncValidateHookOptions = viewAsyncValidateHookOptions;
 exports.default = createLogicMiddleware;
 
 require("core-js/modules/es7.symbol.async-iterator");
@@ -44,6 +45,36 @@ var debug = function debug()
 var OP_INIT = 'init'; // initial monitor op before anything else
 
 /**
+ * Options for controlling "asynchronous validation hook in chained logics" feature.
+ * @typedef AsyncValidateHookOptions
+ * @type {object}
+ * @property {boolean} enable
+ * Indicates whether the asynchronous calls of allow/reject validation hook callbacks
+ *  is supported in chained logics.
+ * Default value is true.
+ * @property {boolean} directOrderOfProcessHooks Defines execution order of process hooks.
+ * Default value is false:
+ *  the execution order is the opposite of execution order of validate hooks.
+ * Direct execution order requires to set "enable" and this property to true.
+ */
+
+/**
+ * @type {AsyncValidateHookOptions}
+ * */
+
+var asyncValidateHookOptions = {
+  enable: true,
+  directOrderOfProcessHooks: false
+};
+/**
+ * Shows "asynchronous validation hook in chained logics" feature options.
+ * @returns {AsyncValidateHookOptions} cloned options. Only for readonly use.
+ */
+
+function viewAsyncValidateHookOptions() {
+  return _objectSpread({}, asyncValidateHookOptions);
+}
+/**
    Builds a redux middleware for handling logic (created with
    createLogic). It also provides a way to inject runtime dependencies
    that will be provided to the logic for use during its execution hooks.
@@ -62,6 +93,7 @@ var OP_INIT = 'init'; // initial monitor op before anything else
    @returns {function} redux middleware with additional methods
      addLogic and replaceLogic
  */
+
 
 function createLogicMiddleware() {
   var arrLogic = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -309,7 +341,7 @@ function applyLogic(arrLogic, store, next, sub, actionIn$, deps, startLogicCount
 
   var wrappedLogic = arrLogic.map(function (logic, idx) {
     var namedLogic = naming(logic, idx + startLogicCount);
-    return (0, _logicWrapper.default)(namedLogic, store, deps, monitor$);
+    return (0, _logicWrapper.default)(namedLogic, store, deps, monitor$, asyncValidateHookOptions);
   });
   var actionOut$ = wrappedLogic.reduce(function (acc$, wep) {
     return wep(acc$);

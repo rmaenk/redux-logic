@@ -20,23 +20,24 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-import { filter, scan, tap, takeWhile } from 'rxjs/operators';
+import { filter, scan, tap, first } from 'rxjs/operators';
 import { identityFn } from './utils';
 
 function createPendingMonitor(_ref) {
   var act = _ref.act,
       logicName = _ref.logicName,
       monitor$ = _ref.monitor$,
-      instanceId = _ref.instanceId;
+      instanceId = _ref.instanceId,
+      reverseOrderOfProcessHooks = _ref.reverseOrderOfProcessHooks;
   var actions = [act];
   return monitor$.pipe(filter(function (x) {
     return actions.some(function (a) {
       return a === x.action || a === x.nextAction && x.op === 'bottom';
     });
   }), scan(function (acc, x) {
-    var reverseOrderOfProcessHooks = true; // append a pending logic count
-
-    var pending = acc.pending || 0; // eslint-disable-next-line default-case
+    // append a pending logic count
+    var pending = acc.pending;
+    var stop = acc.stop; // eslint-disable-next-line default-case
 
     switch (x.op) {
       case 'top':
@@ -106,13 +107,15 @@ function createPendingMonitor(_ref) {
 
 
     return _objectSpread({}, x, {
-      pending: pending // pendingMonitor: instanceId // NOTE: this is for diagnostics only
+      pending: pending,
+      stop: stop // pendingMonitor: instanceId // NOTE: this is for diagnostics only
 
     });
   }, {
     pending: 1
     /* action already at top of logic stack */
-
+    ,
+    stop: false
   }) // tap(function (x) { console.log("pendingMonitor$:", x);})
   );
 }
@@ -120,15 +123,17 @@ function createPendingMonitor(_ref) {
 export default function createReadyForProcessPromise(_ref2) {
   var action = _ref2.action,
       logic = _ref2.logic,
-      monitor$ = _ref2.monitor$;
-  var useOld = false;
-  if (useOld) return Promise.resolve(0);
+      monitor$ = _ref2.monitor$,
+      asyncValidateHookOptions = _ref2.asyncValidateHookOptions;
+  if (!asyncValidateHookOptions.enable) return null;
   var instance = Date.now();
+  var reverseOrderOfProcessHooks = !asyncValidateHookOptions.enable || !asyncValidateHookOptions.directOrderOfProcessHooks;
   var pendingMonitor$ = createPendingMonitor({
     act: action,
     logicName: logic.name,
     monitor$: monitor$,
-    instance: instance
+    instance: instance,
+    reverseOrderOfProcessHooks: reverseOrderOfProcessHooks
   });
   var showTrace = false;
 
@@ -142,10 +147,56 @@ export default function createReadyForProcessPromise(_ref2) {
   var readyForProcess$ = pendingMonitor$.pipe.apply(pendingMonitor$, _toConsumableArray([// eslint-disable-next-line no-console
   showTrace ? tap(function (x) {
     return console.log('-->', 'pending:', x.pending, 'instance=', instance, logic.name, '\n\top:', x.op, '\n\ttime:', new Date(instance).toISOString(), '\n\tentry:', JSON.stringify(x), '<--');
-  }) : null, takeWhile(function (x) {
-    return x.pending;
+  }) : null, first(function (x) {
+    return x.pending <= 0 || x.stop;
   })].filter(identityFn)));
-  return readyForProcess$.toPromise().then(function () {
-    return instance;
+  var resolved = false;
+  var rejected = false;
+  var result = false;
+  var readyForProcessPromise = new Promise(function (resolve, reject) {
+    var sub = readyForProcess$.subscribe({
+      next: function next(x) {
+        result = x.stop;
+      },
+      error: function error(err) {
+        if (showTrace) {
+          // eslint-disable-next-line no-console
+          console.log('readyForProcess$ error', 'instance:', instance, err);
+        }
+
+        reject(err);
+        rejected = true;
+        result = err;
+        sub.unsubscribe();
+      },
+      complete: function complete() {
+        if (showTrace) {
+          // eslint-disable-next-line no-console
+          console.log('readyForProcess$ complete', 'instance:', instance, 'result:', result);
+        }
+
+        resolve(result);
+        resolved = true;
+        sub.unsubscribe();
+      }
+    });
   });
+
+  readyForProcessPromise.isResolved = function () {
+    return resolved;
+  };
+
+  readyForProcessPromise.isRejected = function () {
+    return rejected;
+  };
+
+  readyForProcessPromise.isFulfilled = function () {
+    return resolved || rejected;
+  };
+
+  readyForProcessPromise.getResult = function () {
+    return result;
+  };
+
+  return readyForProcessPromise;
 }

@@ -15,8 +15,8 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-import { Observable, merge, asapScheduler } from 'rxjs';
-import { debounceTime, filter, map, mergeMap, share, tap, throttleTime, scan } from 'rxjs/operators';
+import { merge, asapScheduler } from 'rxjs';
+import { debounceTime, filter, mergeMap, share, tap, throttleTime, scan } from 'rxjs/operators';
 import createLogicAction$ from './createLogicAction$';
 import { identityFn } from './utils';
 import createDispatch from './createDispatch';
@@ -25,7 +25,7 @@ import createCancelled$ from './createCancelled$';
 import createDepObject from './createDepObject';
 import createReadyForProcessPromise from './createReadyForProcessPromise';
 var MATCH_ALL_TYPES = '*';
-export default function logicWrapper(logic, store, deps, monitor$) {
+export default function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
   var name = logic.name,
       type = logic.type,
       cancelType = logic.cancelType,
@@ -50,7 +50,8 @@ export default function logicWrapper(logic, store, deps, monitor$) {
       var readyForProcessPromise = createReadyForProcessPromise({
         action: action,
         logic: logic,
-        monitor$: monitor$
+        monitor$: monitor$,
+        asyncValidateHookOptions: asyncValidateHookOptions
       });
       return createLogicAction$({
         action: action,
@@ -67,7 +68,8 @@ export default function logicWrapper(logic, store, deps, monitor$) {
       var readyForProcessPromise = createReadyForProcessPromise({
         action: action,
         logic: logic,
-        monitor$: monitor$
+        monitor$: monitor$,
+        asyncValidateHookOptions: asyncValidateHookOptions
       }); // mimic the events as if went through createLogicAction$
       // also in createLogicAction$
 
@@ -115,17 +117,35 @@ export default function logicWrapper(logic, store, deps, monitor$) {
         action: action,
         action$: action$
       });
-      readyForProcessPromise.then(function (pendingMonitorId) {
+
+      function execWhenReady(fn) {
+        var isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
+
+        if (isReady) {
+          asapScheduler.schedule(function () {
+            fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
+          });
+        } else {
+          readyForProcessPromise.then(function (skip) {
+            fn(skip);
+          });
+        }
+      }
+
+      execWhenReady(function (skip) {
         setInterceptComplete();
-        execProcessFn({
-          depObj: depObj,
-          dispatch: dispatch,
-          dispatch$: dispatch$,
-          dispatchReturn: dispatchReturn,
-          done: done,
-          name: name,
-          processFn: processFn
-        });
+
+        if (!skip) {
+          execProcessFn({
+            depObj: depObj,
+            dispatch: dispatch,
+            dispatch$: dispatch$,
+            dispatchReturn: dispatchReturn,
+            done: done,
+            name: name,
+            processFn: processFn
+          });
+        }
       });
     });
 

@@ -19,8 +19,7 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-import isPromise from 'is-promise';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { identityFn, wrapActionForIntercept } from './utils';
 import createDepObject from './createDepObject';
@@ -129,6 +128,32 @@ export default function createLogicAction$(_ref) {
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : AllowRejectNextDefaults;
       handleNextOrDispatch(false, act, options);
     }
+    /**
+     * Callback parameter of the execWhenReady function.
+     * @callback execWhenReadyCallback
+     * @param {boolean|undefined} skip
+     */
+
+    /**
+    * Executes a fn callback asynchronously based on readyForProcessPromise.
+    * If promise is not defined or null then the callback is executed synchronously.
+    * @param {execWhenReadyCallback} fn callback
+    * @returns {void}
+    */
+
+
+    function execWhenReady(fn) {
+      if (!fn) return;
+      var isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
+
+      if (isReady) {
+        fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
+      } else {
+        readyForProcessPromise.then(function (skip) {
+          return fn(skip);
+        });
+      }
+    }
 
     function handleNextOrDispatch(shouldProcess, act, options) {
       var shouldProcessAndHasProcessFn = shouldProcess && processFn;
@@ -179,20 +204,26 @@ export default function createLogicAction$(_ref) {
         // processing, was an accept
         // if action provided is empty, give process orig
         depObj.action = act || action;
-        readyForProcessPromise.then(function (pendingMonitorId) {
-          execProcessFn({
-            depObj: depObj,
-            dispatch: dispatch,
-            done: done,
-            processFn: processFn,
-            dispatchReturn: dispatchReturn,
-            dispatch$: dispatch$,
-            name: name
-          });
+        execWhenReady(function (skip) {
+          if (skip) {
+            // TODO: this is not used yet.
+            // Added for skipping all process hooks when 'filtered' op occurs
+            dispatch$.complete();
+          } else {
+            execProcessFn({
+              depObj: depObj,
+              dispatch: dispatch,
+              done: done,
+              processFn: processFn,
+              dispatchReturn: dispatchReturn,
+              dispatch$: dispatch$,
+              name: name
+            });
+          }
         });
       } else {
         // not processing, must have been a reject
-        readyForProcessPromise.then(function (pendingMonitorId) {
+        execWhenReady(function () {
           dispatch$.complete();
         });
       }
@@ -205,7 +236,8 @@ export default function createLogicAction$(_ref) {
         act$.next(act); // triggers call to middleware's next()
       }
 
-      readyForProcessPromise.then(function (pendingMonitorId) {
+      execWhenReady(function (skip) {
+        // TODO: if skip == true should we ignore act$.complete?
         setInterceptComplete();
         act$.complete();
       });
