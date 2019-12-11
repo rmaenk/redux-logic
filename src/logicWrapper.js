@@ -57,11 +57,14 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
           const depObj = createDepObject({ deps, cancelled$, ctx, getState, action, action$ });
 
           function execWhenReady(fn) {
-            if (readyForProcessPromise) {
-              readyForProcessPromise.then((skip) => fn(skip));
-            } else {
+            let isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
+            if (isReady) {
               asapScheduler.schedule(() => {
-                fn();
+                fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
+              });
+            } else {
+              readyForProcessPromise.then((skip) => {
+                fn(skip);
               });
             }
           }

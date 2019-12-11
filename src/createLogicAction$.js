@@ -77,10 +77,11 @@ export default function createLogicAction$({ action, logic, store, deps,
     * @param {execWhenReadyCallback} fn
     */
     function execWhenReady(fn) {
-      if (readyForProcessPromise) {
-        readyForProcessPromise.then((skip) => fn(skip));
+      let isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
+      if (isReady) {
+        fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
       } else {
-        fn();
+        readyForProcessPromise.then((skip) => fn(skip));
       }
     }
 

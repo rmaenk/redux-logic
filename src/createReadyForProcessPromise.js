@@ -117,8 +117,37 @@ export default function createReadyForProcessPromise({
       first(x => x.pending <= 0 || x.stop)
     ].filter(identityFn)
   );
-  return readyForProcess$.toPromise().then((x) => {
-    // skip flag for process hooks
-    return x.stop;
+
+  let resolved = false;
+  let rejected = false;
+  let result = false;
+  const readyForProcessPromise = new Promise((resolve, reject) => {
+    const sub = readyForProcess$.subscribe({
+      next(x) {
+        result = x.stop;
+      },
+      error(err) {
+        if (showTrace) {
+          console.log("readyForProcess$ error", "instance:", instance, err);
+        }
+        reject(err);
+        rejected = true;
+        result = err;
+        sub.unsubscribe();
+      },
+      complete() {
+        if (showTrace) {
+          console.log("readyForProcess$ complete", "instance:", instance);
+        }
+        resolve(result);
+        resolved = true;
+        sub.unsubscribe();
+      }
+    });
   });
+  readyForProcessPromise.isResolved = () => resolved;
+  readyForProcessPromise.isRejected = () => rejected;
+  readyForProcessPromise.isFulfilled = () => resolved || rejected;
+  readyForProcessPromise.getResult = () => result;
+  return readyForProcessPromise;
 }
