@@ -128,7 +128,8 @@ export default function createReadyForProcessPromise({
       },
       error(err) {
         if (showTrace) {
-          console.log("readyForProcess$ error", "instance:", instance, err);
+          // eslint-disable-next-line no-console
+          console.log('readyForProcess$ error', 'instance:', instance, err);
         }
         reject(err);
         rejected = true;
@@ -137,7 +138,8 @@ export default function createReadyForProcessPromise({
       },
       complete() {
         if (showTrace) {
-          console.log("readyForProcess$ complete", "instance:", instance);
+          // eslint-disable-next-line no-console
+          console.log('readyForProcess$ complete', 'instance:', instance);
         }
         resolve(result);
         resolved = true;

@@ -72,12 +72,14 @@ export default function createLogicAction$({ action, logic, store, deps,
      */
 
     /**
-    * Executes a fn callback asynchronously based on readyForProcessPromise. 
+    * Executes a fn callback asynchronously based on readyForProcessPromise.
     * If promise is not defined or null then the callback is executed synchronously.
-    * @param {execWhenReadyCallback} fn
+    * @param {execWhenReadyCallback} fn callback
+    * @returns {void}
     */
     function execWhenReady(fn) {
-      let isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
+      if (!fn) return;
+      const isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
       if (isReady) {
         fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
       } else {
@@ -110,7 +112,8 @@ export default function createLogicAction$({ action, logic, store, deps,
 
         execWhenReady((skip) => {
           if (skip) {
-            // TODO: this is not used yet. Added for skipping all process hooks when 'filtered' op occurs
+            // TODO: this is not used yet.
+            // Added for skipping all process hooks when 'filtered' op occurs
             dispatch$.complete();
           } else {
             execProcessFn({
@@ -119,16 +122,7 @@ export default function createLogicAction$({ action, logic, store, deps,
             });
           }
         });
-
       } else { // not processing, must have been a reject
-        // TODO: add unit tests for this code block
-        // execWhenReady is used to make order of process hook deterministic,
-        // but this breaks the next tests:
-        //  - "createLogicMiddleware-integration rapid call with single logic"
-        //  - "createLogicMiddleware-integration rapid call with 2 logic"
-        // the reason is a postponed call of dispatch.complete 
-        // in result monitor$ emits 'end' operation too late
-        // TBD: It looks like not an issue and changing test expectations is a solution
         execWhenReady(() => {
           dispatch$.complete();
         });
@@ -141,7 +135,7 @@ export default function createLogicAction$({ action, logic, store, deps,
         act$.next(act);  // triggers call to middleware's next()
       }
       execWhenReady((skip) => {
-        // TODO: if skip == true should we ignore act$.complete? 
+        // TODO: if skip == true should we ignore act$.complete?
         setInterceptComplete();
         act$.complete();
       });
@@ -152,7 +146,7 @@ export default function createLogicAction$({ action, logic, store, deps,
       // normal intercept and processing
       return intercept(depObj, allow, reject);
     }
-    
+
     start();
   }).pipe(...logicActionOps); // take, takeUntil
 
