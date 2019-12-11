@@ -530,80 +530,42 @@ describe('createLogicMiddleware-integration', () => {
     });
 
     it('mw.monitor$ should track flow', () => {
-      if (false && asyncValidateHookOptions.enable) {
-        expect(monArr).toEqual([
-          { action: { type: 'FOO' },/* */ op: 'top' },
-          { action: { type: 'FOO' },/* */ op: 'begin', name: 'logicA' },
-          { action: { type: 'FOO' },/* */ op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
-          { /*                         */ op: 'bottom', nextAction: { type: 'FOO' } },
-          { action: { type: 'FOO' },/* */ op: 'dispatch', dispAction: { type: 'ONE' } },
-          //------------------------------------------------------------
-          { action: { type: 'ONE' },/* */ op: 'top' },
-          { action: { type: 'ONE' },/* */ op: 'begin', name: 'logic1' },
-          { action: { type: 'ONE' },/* */ op: 'next', name: 'logic1', nextAction: { type: 'ONE' }, shouldProcess: true },
-          { /*                         */ op: 'bottom', nextAction: { type: 'ONE' } },
-          //------------------------------------------------------------
-          { action: { type: 'FOO' },/* */ op: 'dispatch', dispAction: { type: 'TWO' } },
-          //------------------------------------------------------------
-          { action: { type: 'TWO' },/* */ op: 'top' },
-          { action: { type: 'TWO' },/* */ op: 'begin', name: 'logic2' },
-          { action: { type: 'TWO' },/* */ op: 'next', name: 'logic2', nextAction: { type: 'TWO' }, shouldProcess: true },
-          { /*                         */ op: 'bottom', nextAction: { type: 'TWO' } },
-          //------------------------------------------------------------
-          { action: { type: 'FOO' },/* */ op: 'end', name: 'logicA' },
-          //------------------------------------------------------------
-          { action: { type: 'ONE' },/* */ op: 'dispatch', dispAction: { type: 'BAR1' } },
-          { action: { type: 'BAR1' },/**/ op: 'top' },
-          { /*                         */ op: 'bottom', nextAction: { type: 'BAR1' } },
-          { action: { type: 'ONE' },/* */ op: 'end', name: 'logic1' },
-          //------------------------------------------------------------
-          { action: { type: 'TWO' },/* */ op: 'dispatch', dispAction: { type: 'BAR2' } },
-          { action: { type: 'BAR2' },/**/ op: 'top' },
-          { /*                         */ op: 'bottom', nextAction: { type: 'BAR2' } },
-          { action: { type: 'TWO' },/* */ op: 'end', name: 'logic2' },
-          //------------------------------------------------------------
-          null
-        ]);
-      } else if (true) {
-        expect(monArr).toEqual([
-          { action: { type: 'FOO' },/* */ op: 'top' },
-          { action: { type: 'FOO' },/* */ op: 'begin', name: 'logicA' },
-          { action: { type: 'FOO' },/* */ op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
-          { /*                         */ op: 'bottom', nextAction: { type: 'FOO' } },
-          { action: { type: 'FOO' },/* */ op: 'dispatch', dispAction: { type: 'ONE' } },
-          //------------------------------------------------------------
-          { action: { type: 'ONE' },/* */ op: 'top' },
-          { action: { type: 'ONE' },/* */ op: 'begin', name: 'logic1' },
-          { action: { type: 'ONE' },/* */ op: 'next', name: 'logic1', nextAction: { type: 'ONE' }, shouldProcess: true },
-          { /*                         */ op: 'bottom', nextAction: { type: 'ONE' } },
+      expect(monArr).toEqual([
+        { action: { type: 'FOO' }, /* */op: 'top' },
+        { action: { type: 'FOO' }, /* */op: 'begin', name: 'logicA' },
+        { action: { type: 'FOO' }, /* */op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
+        { /*                          */op: 'bottom', nextAction: { type: 'FOO' } },
+        { action: { type: 'FOO' }, /* */op: 'dispatch', dispAction: { type: 'ONE' } },
+        //------------------------------------------------------------
+        { action: { type: 'ONE' }, /* */op: 'top' },
+        { action: { type: 'ONE' }, /* */op: 'begin', name: 'logic1' },
+        { action: { type: 'ONE' }, /* */op: 'next', name: 'logic1', nextAction: { type: 'ONE' }, shouldProcess: true },
+        { /*                          */op: 'bottom', nextAction: { type: 'ONE' } },
 
-          { action: { type: 'ONE' },/* */ op: 'dispatch', dispAction: { type: 'BAR1' } },
+        { action: { type: 'ONE' }, /* */op: 'dispatch', dispAction: { type: 'BAR1' } },
 
-          { action: { type: 'BAR1' },/**/ op: 'top' },
-          { /*                         */ op: 'bottom', nextAction: { type: 'BAR1' } },
-          { action: { type: 'ONE' },/* */ op: 'end', name: 'logic1' },
-          //------------------------------------------------------------
-          { action: { type: 'FOO' },/* */ op: 'dispatch', dispAction: { type: 'TWO' } },
-          //------------------------------------------------------------
-          { action: { type: 'TWO' },/* */ op: 'top' },
-          { action: { type: 'TWO' },/* */ op: 'begin', name: 'logic2' },
-          { action: { type: 'TWO' },/* */ op: 'next', name: 'logic2', nextAction: { type: 'TWO' }, shouldProcess: true },
-          { /*                         */ op: 'bottom', nextAction: { type: 'TWO' } },
+        { action: { type: 'BAR1' }, /**/op: 'top' },
+        { /*                          */op: 'bottom', nextAction: { type: 'BAR1' } },
+        { action: { type: 'ONE' }, /* */op: 'end', name: 'logic1' },
+        //------------------------------------------------------------
+        { action: { type: 'FOO' }, /* */op: 'dispatch', dispAction: { type: 'TWO' } },
+        //------------------------------------------------------------
+        { action: { type: 'TWO' }, /* */op: 'top' },
+        { action: { type: 'TWO' }, /* */op: 'begin', name: 'logic2' },
+        { action: { type: 'TWO' }, /* */op: 'next', name: 'logic2', nextAction: { type: 'TWO' }, shouldProcess: true },
+        { /*                          */op: 'bottom', nextAction: { type: 'TWO' } },
 
-          { action: { type: 'TWO' },/* */ op: 'dispatch', dispAction: { type: 'BAR2' } },
+        { action: { type: 'TWO' }, /* */op: 'dispatch', dispAction: { type: 'BAR2' } },
 
-          { action: { type: 'BAR2' },/**/ op: 'top' },
-          { /*                         */ op: 'bottom', nextAction: { type: 'BAR2' } },
-          { action: { type: 'TWO' },/* */ op: 'end', name: 'logic2' },
-          //------------------------------------------------------------
-          { action: { type: 'FOO' },/* */ op: 'end', name: 'logicA' },
-        ]);
-      } else {
-        expect(monArr).toEqual([]);
-      }
+        { action: { type: 'BAR2' }, /**/op: 'top' },
+        { /*                          */op: 'bottom', nextAction: { type: 'BAR2' } },
+        { action: { type: 'TWO' }, /* */op: 'end', name: 'logic2' },
+        //------------------------------------------------------------
+        { action: { type: 'FOO' }, /* */op: 'end', name: 'logicA' }
+      ]);
     });
-
   });
+
   describe('rapid call with 2 logic', () => {
     let storeUpdates;
     let monArr = [];
