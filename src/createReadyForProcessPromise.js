@@ -86,7 +86,7 @@ export default function createReadyForProcessPromise({
       act: action, logicName: logic.name, monitor$, instance, reverseOrderOfProcessHooks
     });
 
-  const showTrace = true;
+  const showTrace = false;
   if (showTrace) {
     // eslint-disable-next-line no-console
     console.log('-->',
