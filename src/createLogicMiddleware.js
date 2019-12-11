@@ -1,5 +1,5 @@
 import { Subject, BehaviorSubject } from 'rxjs';
-import { filter, map, scan, takeWhile, tap } from 'rxjs/operators';
+import { scan, takeWhile } from 'rxjs/operators';
 import wrapper from './logicWrapper';
 import { identityFn, stringifyType } from './utils';
 

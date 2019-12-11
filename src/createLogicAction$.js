@@ -1,4 +1,4 @@
-import { Observable, asapScheduler, asyncScheduler } from 'rxjs';
+import { Observable } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { identityFn, wrapActionForIntercept } from './utils';
 import createDepObject from './createDepObject';
