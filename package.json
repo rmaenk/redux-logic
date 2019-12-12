@@ -19,7 +19,9 @@
     "build-lib",
     "build-es",
     "src",
-    "definitions"
+    "definitions",
+    "tests/*.spec.js",
+    "tests/*.ts"
   ],
   "scripts": {
     "start": "npm run test:watch",
