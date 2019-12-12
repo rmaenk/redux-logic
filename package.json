@@ -20,8 +20,8 @@
     "build-es",
     "src",
     "definitions",
-    "tests/*.spec.js",
-    "tests/*.ts"
+    "test/*.spec.js",
+    "test/*.ts"
   ],
   "scripts": {
     "start": "npm run test:watch",
