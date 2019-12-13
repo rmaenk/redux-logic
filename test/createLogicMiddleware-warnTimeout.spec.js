@@ -66,8 +66,10 @@ describe('createLogicMiddleware-warnTimeout', () => {
         { action: { type: 'FOO' },
           dispAction: { type: 'BAR' },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
   });
 
@@ -195,13 +197,15 @@ describe('createLogicMiddleware-warnTimeout', () => {
         { action: { type: 'FOO' },
           dispAction: { type: 'BAR' },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO_CANCEL' }, op: 'top' },
         { nextAction: { type: 'FOO_CANCEL' }, op: 'bottom' },
         { action: { type: 'FOO' },
           name: 'L(FOO)-0',
           op: 'dispCancelled' },
         { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
   });
 
@@ -264,13 +268,15 @@ describe('createLogicMiddleware-warnTimeout', () => {
         { action: { type: 'FOO' },
           dispAction: { type: 'BAR' },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO_CANCEL' }, op: 'top' },
         { nextAction: { type: 'FOO_CANCEL' }, op: 'bottom' },
         { action: { type: 'FOO' },
           name: 'L(FOO)-0',
           op: 'dispCancelled' },
         { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
   });
 
@@ -440,8 +446,10 @@ describe('createLogicMiddleware-warnTimeout', () => {
         { action: { type: 'FOO' },
           dispAction: { type: 'BAR' },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
   });
 
@@ -562,13 +570,15 @@ describe('createLogicMiddleware-warnTimeout', () => {
         { action: { type: 'FOO' },
           dispAction: { type: 'BAR' },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO_CANCEL' }, op: 'top' },
         { nextAction: { type: 'FOO_CANCEL' }, op: 'bottom' },
         { action: { type: 'FOO' },
           name: 'L(FOO)-0',
           op: 'dispCancelled' },
         { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
   });
 
@@ -631,13 +641,15 @@ describe('createLogicMiddleware-warnTimeout', () => {
         { action: { type: 'FOO' },
           dispAction: { type: 'BAR' },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO_CANCEL' }, op: 'top' },
         { nextAction: { type: 'FOO_CANCEL' }, op: 'bottom' },
         { action: { type: 'FOO' },
           name: 'L(FOO)-0',
           op: 'dispCancelled' },
         { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
   });
 

@@ -388,6 +388,8 @@ describe('createLogicMiddleware-latest', () => {
           shouldProcess: true,
           op: 'next' },
         { nextAction: { type: 'FOO', id: 1 }, op: 'bottom' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO', id: 1 }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO', id: 2 }, op: 'top' },
         { action: { type: 'FOO', id: 2 }, name: 'L(FOO)-0', op: 'begin' },
         { action: { type: 'FOO', id: 2 },
@@ -400,11 +402,13 @@ describe('createLogicMiddleware-latest', () => {
           name: 'L(FOO)-0',
           op: 'dispCancelled' },
         { action: { type: 'FOO', id: 1 }, name: 'L(FOO)-0', op: 'end' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO', id: 2 }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO', id: 2 },
           dispAction: { type: 'BAR', id: 2 },
           op: 'dispatch' },
         { action: { type: 'FOO', id: 2 }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
 
     it('mw.whenComplete(fn) should be called when complete', (bDone) => {
@@ -484,6 +488,8 @@ describe('createLogicMiddleware-latest', () => {
         { action: { type: 'FOO', id: 1 },
           dispAction: { type: 'BAR', id: 1 },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO', id: 1 }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO', id: 2 }, op: 'top' },
         { action: { type: 'FOO', id: 2 }, name: 'L(FOO)-0', op: 'begin' },
         { action: { type: 'FOO', id: 2 },
@@ -499,11 +505,13 @@ describe('createLogicMiddleware-latest', () => {
         { action: { type: 'FOO', id: 2 },
           dispAction: { type: 'BAR', id: 2 },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO', id: 2 }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO', id: 2 },
           dispAction: { type: 'CAT', id: 2 },
           op: 'dispatch' },
         { action: { type: 'FOO', id: 2 }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
 
     it('mw.whenComplete(fn) should be called when complete', (bDone) => {

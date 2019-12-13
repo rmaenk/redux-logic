@@ -724,13 +724,15 @@ describe('createLogicMiddleware-process', () => {
         { action: { type: 'FOO' },
           dispAction: { type: 'CAT', a: 1 },
           op: 'dispatch' },
+        mw.advancedAsyncLogicSupport &&
+        { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'dispFuture' },
         { action: { type: 'FOO_CANCEL' }, op: 'top' },
         { nextAction: { type: 'FOO_CANCEL' }, op: 'bottom' },
         { action: { type: 'FOO' },
           name: 'L(FOO)-0',
           op: 'dispCancelled' },
         { action: { type: 'FOO' }, name: 'L(FOO)-0', op: 'end' }
-      ]);
+      ].filter(o => o));
     });
 
     it('mw.whenComplete(fn) should be called when complete', (bDone) => {

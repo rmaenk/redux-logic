@@ -125,6 +125,11 @@ export default function createLogicMiddleware(arrLogic = [], deps = {}) {
     };
   }
 
+  Object.defineProperty(mw, "advancedAsyncLogicSupport", {
+    value: viewAsyncValidateHookOptions().enable,
+    writable: false
+  });
+
   /**
     observable to monitor flow in logic
     */

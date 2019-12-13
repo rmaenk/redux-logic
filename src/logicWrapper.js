@@ -74,6 +74,12 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
             setInterceptComplete();
             if (!skip) {
               execProcessFn({ depObj, dispatch, dispatch$, dispatchReturn, done, name, processFn });
+              if (readyForProcessPromise && !dispatch$.isStopped) {
+                // process fn still uses dispatch asynchronously until done is called or infinite
+                monitor$.next({ action, op: 'dispFuture', name });
+              }
+            } else {
+              dispatch$.complete();
             }
           });
         });

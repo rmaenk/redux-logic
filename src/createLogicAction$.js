@@ -120,6 +120,10 @@ export default function createLogicAction$({ action, logic, store, deps,
               depObj, dispatch, done, processFn,
               dispatchReturn, dispatch$, name
             });
+            if (readyForProcessPromise && !dispatch$.isStopped) {
+              // process fn still uses dispatch asynchronously until done is called or infinite
+              monitor$.next({ action, op: 'dispFuture', name });
+            }
           }
         });
       } else { // not processing, must have been a reject
