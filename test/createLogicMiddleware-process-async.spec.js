@@ -29,10 +29,10 @@ describe('createLogicMiddleware-process-async', () => {
 
   describe('two logics of the same type', () => {
     const actionFoo = { type: 'FOO' };
-    const actionBat = { type: 'BAT' };
-    const actionCat = { type: 'CAT' };
-    const actionDog = { type: 'DOG' };
-    const actionElk = { type: 'ELK' };
+    const actionCat1 = { type: 'CAT1' };
+    const actionCat2 = { type: 'CAT2' };
+    const actionBar1 = { type: 'BAR1' };
+    const actionBar2 = { type: 'BAR2' };
 
     // use to change interrupt timeout for all tests, in ms
     // increasing the value extends tests execution duration,
@@ -114,10 +114,6 @@ describe('createLogicMiddleware-process-async', () => {
         let next;
         let dispatch;
         let whenComplete;
-        const actionFoo = { type: 'FOO' };
-        const actionDog = { type: 'DOG' };
-        const actionBat = { type: 'BAT' };
-        const actionCat = { type: 'CAT' };
         before(bDone => {
           monArr = [];
           next = expect.createSpy();
@@ -132,8 +128,8 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateA,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionBat);
-              dispatch(actionCat);
+              dispatch(actionCat1);
+              dispatch(actionCat2);
             }
           });
           logicB = createLogic({
@@ -141,8 +137,8 @@ describe('createLogicMiddleware-process-async', () => {
             name: 'logicB',
             validate: test.validateB,
             process(deps, dispatch, done) {
-              dispatch(actionDog);
-              dispatch(actionElk);
+              dispatch(actionBar1);
+              dispatch(actionBar2);
               done();
             }
           });
@@ -160,10 +156,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionElk,
-          actionBat,
-          actionCat
+          actionBar1,
+          actionBar2,
+          actionCat1,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -174,11 +170,11 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'begin', name: 'logicB' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             // no end for logicA
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicA' }
@@ -210,8 +206,8 @@ describe('createLogicMiddleware-process-async', () => {
             name: 'logicA',
             validate: test.validateA,
             process(deps, dispatch, done) {
-              dispatch(actionBat);
-              dispatch(actionCat);
+              dispatch(actionCat1);
+              dispatch(actionCat2);
               done();
             }
           });
@@ -224,8 +220,8 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateB,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionDog);
-              dispatch(actionElk);
+              dispatch(actionBar1);
+              dispatch(actionBar2);
             }
           });
           mw = createLogicMiddleware([logicA, logicB]);
@@ -242,10 +238,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionElk,
-          actionBat,
-          actionCat
+          actionBar1,
+          actionBar2,
+          actionCat1,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -256,13 +252,13 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'begin', name: 'logicB' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             // no end for logicB
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicB' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' }
           ].filter(o => o));
         });
@@ -293,8 +289,8 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateA,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionBat);
-              dispatch(actionCat);
+              dispatch(actionCat1);
+              dispatch(actionCat2);
             }
           });
           logicB = createLogic({
@@ -306,8 +302,8 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateB,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionDog);
-              dispatch(actionElk);
+              dispatch(actionBar1);
+              dispatch(actionBar2);
             }
           });
           mw = createLogicMiddleware([logicA, logicB]);
@@ -324,10 +320,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionElk,
-          actionBat,
-          actionCat
+          actionBar1,
+          actionBar2,
+          actionCat1,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -338,13 +334,13 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'begin', name: 'logicB' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             // no end for logicB
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicB' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             // no end for logicA
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicA' },
@@ -378,8 +374,8 @@ describe('createLogicMiddleware-process-async', () => {
             },
             validate: test.validateA,
             process(deps, dispatch, done) {
-              dispatch(actionBat);
-              dispatch(actionCat);
+              dispatch(actionCat1);
+              dispatch(actionCat2);
               done();
             }
           });
@@ -388,8 +384,8 @@ describe('createLogicMiddleware-process-async', () => {
             name: 'logicB',
             validate: test.validateB,
             process(deps, dispatch, done) {
-              dispatch(actionDog);
-              dispatch(actionElk);
+              dispatch(actionBar1);
+              dispatch(actionBar2);
               done();
             }
           });
@@ -403,10 +399,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionElk,
-          actionBat,
-          actionCat
+          actionBar1,
+          actionBar2,
+          actionCat1,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -417,11 +413,11 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'begin', name: 'logicB' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' },
           ].filter(o => o));
         });
@@ -455,8 +451,8 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateA,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionBat);
-              dispatch(actionCat);
+              dispatch(actionCat1);
+              dispatch(actionCat2);
               setTimeout(done, test.interrupt / 4);
             }
           });
@@ -465,8 +461,8 @@ describe('createLogicMiddleware-process-async', () => {
             name: 'logicB',
             validate: test.validateB,
             process(deps, dispatch, done) {
-              dispatch(actionDog);
-              dispatch(actionElk);
+              dispatch(actionBar1);
+              dispatch(actionBar2);
               done();
             }
           });
@@ -484,10 +480,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionElk,
-          actionBat,
-          actionCat
+          actionBar1,
+          actionBar2,
+          actionCat1,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -498,11 +494,11 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'begin', name: 'logicB' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicA' },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' }
@@ -537,8 +533,8 @@ describe('createLogicMiddleware-process-async', () => {
             },
             validate: test.validateA,
             process(deps, dispatch, done) {
-              dispatch(actionBat);
-              dispatch(actionCat);
+              dispatch(actionCat1);
+              dispatch(actionCat2);
               done();
             }
           });
@@ -548,8 +544,8 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateB,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionDog);
-              dispatch(actionElk);
+              dispatch(actionBar1);
+              dispatch(actionBar2);
               setTimeout(done, test.interrupt / 4);
             }
           });
@@ -567,10 +563,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionElk,
-          actionBat,
-          actionCat
+          actionBar1,
+          actionBar2,
+          actionCat1,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -581,12 +577,12 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'begin', name: 'logicB' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicB' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' },
             // delayed call of done for logicB
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
@@ -622,8 +618,8 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateA,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionBat);
-              dispatch(actionCat);
+              dispatch(actionCat1);
+              dispatch(actionCat2);
               setTimeout(done, test.interrupt / 4);
             }
           });
@@ -633,8 +629,8 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateB,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionDog);
-              dispatch(actionElk);
+              dispatch(actionBar1);
+              dispatch(actionBar2);
               setTimeout(done, test.interrupt / 4);
             }
           });
@@ -652,10 +648,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionElk,
-          actionBat,
-          actionCat
+          actionBar1,
+          actionBar2,
+          actionCat1,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -666,12 +662,12 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'begin', name: 'logicB' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicB' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicA' },
             // delayed call of done for logicB then for logicA
@@ -709,9 +705,9 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateA,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionBat);
+              dispatch(actionCat1);
               setTimeout(() => {
-                dispatch(actionCat);
+                dispatch(actionCat2);
                 done();
               }, test.interrupt / 4);
             }
@@ -721,8 +717,8 @@ describe('createLogicMiddleware-process-async', () => {
             name: 'logicB',
             validate: test.validateB,
             process(deps, dispatch, done) {
-              dispatch(actionDog);
-              dispatch(actionElk);
+              dispatch(actionBar1);
+              dispatch(actionBar2);
               done();
             }
           });
@@ -740,10 +736,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionElk,
-          actionBat,
-          actionCat
+          actionBar1,
+          actionBar2,
+          actionCat1,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -754,13 +750,13 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'begin', name: 'logicB' },
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicA' },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' }
           ].filter(o => o));
         });
@@ -793,8 +789,8 @@ describe('createLogicMiddleware-process-async', () => {
             },
             validate: test.validateA,
             process(deps, dispatch, done) {
-              dispatch(actionBat);
-              dispatch(actionCat);
+              dispatch(actionCat1);
+              dispatch(actionCat2);
               done();
             }
           });
@@ -804,9 +800,9 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateB,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionDog);
+              dispatch(actionBar1);
               setTimeout(() => {
-                dispatch(actionElk);
+                dispatch(actionBar2);
                 done();
               }, test.interrupt / 4);
             }
@@ -825,10 +821,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionBat,
-          actionCat,
-          actionElk
+          actionBar1,
+          actionCat1,
+          actionCat2,
+          actionBar2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -840,16 +836,16 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
             // ---------------------------------------------------------------------
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicB' },
             // ---------------------------------------------------------------------
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' },
             // ---------------------------------------------------------------------
             // delayed execution for logicB
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
           ].filter(o => o));
         });
@@ -883,9 +879,9 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateA,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionBat);
+              dispatch(actionCat1);
               setTimeout(() => {
-                dispatch(actionCat);
+                dispatch(actionCat2);
                 done();
               }, test.interrupt / 4);
             }
@@ -896,9 +892,9 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateB,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionDog);
+              dispatch(actionBar1);
               setTimeout(() => {
-                dispatch(actionElk);
+                dispatch(actionBar2);
                 done();
               }, test.interrupt / 4);
             }
@@ -917,10 +913,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionBat,
-          actionElk,
-          actionCat
+          actionBar1,
+          actionCat1,
+          actionBar2,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -932,19 +928,19 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
             // ---------------------------------------------------------------------
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicB' },
             // ---------------------------------------------------------------------
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicA' },
             // ---------------------------------------------------------------------
             // delayed execution for logicB
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
             // delayed execution for logicA
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' },
           ].filter(o => o));
         });
@@ -978,9 +974,9 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateA,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionBat);
+              dispatch(actionCat1);
               setTimeout(() => {
-                dispatch(actionCat);
+                dispatch(actionCat2);
                 done();
               }, test.interrupt / 4 - 10);
             }
@@ -991,9 +987,9 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateB,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionDog);
+              dispatch(actionBar1);
               setTimeout(() => {
-                dispatch(actionElk);
+                dispatch(actionBar2);
                 done();
               }, test.interrupt / 4 + 10);
             }
@@ -1012,10 +1008,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
 
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionBat,
-          actionCat,
-          actionElk
+          actionBar1,
+          actionCat1,
+          actionCat2,
+          actionBar2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -1027,19 +1023,19 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
             // ---------------------------------------------------------------------
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicB' },
             // ---------------------------------------------------------------------
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicA' },
             // ---------------------------------------------------------------------
             // delayed execution for logicA
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' },
             // delayed execution for logicB
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
           ].filter(o => o));
         });
@@ -1072,9 +1068,9 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateA,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionBat);
+              dispatch(actionCat1);
               setTimeout(() => {
-                dispatch(actionCat);
+                dispatch(actionCat2);
                 done();
               }, test.interrupt / 4 + 5);
             }
@@ -1085,9 +1081,9 @@ describe('createLogicMiddleware-process-async', () => {
             validate: test.validateB,
             process(deps, dispatch, done) {
               disposes.push(done);
-              dispatch(actionDog);
+              dispatch(actionBar1);
               setTimeout(() => {
-                dispatch(actionElk);
+                dispatch(actionBar2);
                 done();
               }, test.interrupt / 4 - 5);
             }
@@ -1106,10 +1102,10 @@ describe('createLogicMiddleware-process-async', () => {
         it(...itPassesThroughNext(() => next, [actionFoo]));
         
         it(...itDispatches(() => dispatch, [
-          actionDog,
-          actionBat,
-          actionElk,
-          actionCat
+          actionBar1,
+          actionCat1,
+          actionBar2,
+          actionCat2
         ]));
 
         it('mw.monitor$ should track flow', () => {
@@ -1121,19 +1117,19 @@ describe('createLogicMiddleware-process-async', () => {
             { action: { type: 'FOO' }, op: 'next', name: 'logicB', nextAction: { type: 'FOO' }, shouldProcess: true },
             { /*                    */ op: 'bottom', nextAction: { type: 'FOO' } },
             // ---------------------------------------------------------------------
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'DOG' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR1' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicB' },
             // ---------------------------------------------------------------------
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT1' } },
             mw.advancedAsyncLogicSupport &&
             { action: { type: 'FOO' }, op: 'dispFuture', name: 'logicA' },
             // ---------------------------------------------------------------------
             // delayed execution for logicB
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'ELK' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'BAR2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicB' },
             // delayed execution for logicA
-            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT' } },
+            { action: { type: 'FOO' }, op: 'dispatch', dispAction: { type: 'CAT2' } },
             { action: { type: 'FOO' }, op: 'end', name: 'logicA' },
           ].filter(o => o));
         });
