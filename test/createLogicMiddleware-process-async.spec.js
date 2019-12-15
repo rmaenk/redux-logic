@@ -5,11 +5,12 @@ import { createLogic, createLogicMiddleware } from '../src/index';
 describe('createLogicMiddleware-process-async', () => {
   /**
    * Interrupts async test hooks
-   * @param hDone done callback of mocha test hook
-   * @param timeout time is ms for waiting before interrupt a mocha test hook
-   * @param mw redux-logic middleware,
+   * @param {Function} hDone done callback of mocha test hook
+   * @param {number} timeout time is ms for waiting before interrupt a mocha test hook
+   * @param {object} mw redux-logic middleware,
    *  when specified then it expected that test hook will complete
    *  using mw.whenComplete before interrupting by timeout.
+   * @returns {void}
    */
   function interrupt(hDone, timeout, mw) {
     // used to avoid double call of hDone callback
@@ -19,12 +20,15 @@ describe('createLogicMiddleware-process-async', () => {
       hDone();
     }, timeout);
 
-    mw && mw.whenComplete(() => {
-      // avoids double call of hDone callback
-      clearTimeout(timer);
-      if (!interrupted)
-        hDone();
-    });
+    if (mw) {
+      mw.whenComplete(() => {
+        // avoids double call of hDone callback
+        clearTimeout(timer);
+        if (!interrupted) {
+          hDone();
+        }
+      });
+    }
   }
 
   describe('two logics of the same type', () => {
@@ -106,20 +110,14 @@ describe('createLogicMiddleware-process-async', () => {
 
     tests.forEach(test => {
       describe(`first logic with infinite dispatch, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -132,7 +130,7 @@ describe('createLogicMiddleware-process-async', () => {
               dispatch(actionBarA2);
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -188,20 +186,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`second logic with infinite dispatch, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             validate: test.validateA,
@@ -211,7 +203,7 @@ describe('createLogicMiddleware-process-async', () => {
               done();
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             processOptions: {
@@ -270,20 +262,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`both logics with infinite dispatch, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             validate: test.validateA,
@@ -293,7 +279,7 @@ describe('createLogicMiddleware-process-async', () => {
               dispatch(actionBarA2);
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             processOptions: {
@@ -354,19 +340,13 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`both logics with sync done, ${test.title}`, () => {
-        let monArr = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -379,7 +359,7 @@ describe('createLogicMiddleware-process-async', () => {
               done();
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -429,20 +409,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`first logic with delayed done, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -456,7 +430,7 @@ describe('createLogicMiddleware-process-async', () => {
               setTimeout(done, test.interrupt / 4);
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -512,20 +486,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`second logic with delayed done, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -538,7 +506,7 @@ describe('createLogicMiddleware-process-async', () => {
               done();
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -596,20 +564,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`both logics with delayed done, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -623,7 +585,7 @@ describe('createLogicMiddleware-process-async', () => {
               setTimeout(done, test.interrupt / 4);
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -683,20 +645,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`first logic with delayed action and done, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -712,7 +668,7 @@ describe('createLogicMiddleware-process-async', () => {
               }, test.interrupt / 4);
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -768,20 +724,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`second logic with delayed action and done, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -794,7 +744,7 @@ describe('createLogicMiddleware-process-async', () => {
               done();
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -857,20 +807,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`both logics with delayed action and done for the same timeout, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -886,7 +830,7 @@ describe('createLogicMiddleware-process-async', () => {
               }, test.interrupt / 4);
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -952,20 +896,14 @@ describe('createLogicMiddleware-process-async', () => {
       });
 
       describe(`both logics with delayed action and done, first early then second, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -981,7 +919,7 @@ describe('createLogicMiddleware-process-async', () => {
               }, test.interrupt / 4 - 10);
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -1046,20 +984,14 @@ describe('createLogicMiddleware-process-async', () => {
         });
       });
       describe(`both logics with delayed action and done, second early then first, ${test.title}`, () => {
-        let disposes = [];
-        let monArr = [];
+        const disposes = [];
+        const monArr = [];
         let mw;
-        let logicA;
-        let logicB;
-        let next;
-        let dispatch;
-        let whenComplete;
+        const next = expect.createSpy();
+        const dispatch = expect.createSpy();
+        const whenComplete = expect.createSpy();
         before(bDone => {
-          monArr = [];
-          next = expect.createSpy();
-          dispatch = expect.createSpy();
-          whenComplete = expect.createSpy();
-          logicA = createLogic({
+          const logicA = createLogic({
             type: 'FOO',
             name: 'logicA',
             processOptions: {
@@ -1075,7 +1007,7 @@ describe('createLogicMiddleware-process-async', () => {
               }, test.interrupt / 4 + 5);
             }
           });
-          logicB = createLogic({
+          const logicB = createLogic({
             type: 'FOO',
             name: 'logicB',
             validate: test.validateB,
@@ -1100,7 +1032,7 @@ describe('createLogicMiddleware-process-async', () => {
         });
 
         it(...itPassesThroughNext(() => next, [actionFoo]));
-        
+
         it(...itDispatches(() => dispatch, [
           actionBarB1,
           actionBarA1,
