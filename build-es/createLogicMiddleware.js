@@ -171,10 +171,14 @@ export default function createLogicMiddleware() {
       };
     };
   }
+
+  Object.defineProperty(mw, 'advancedAsyncLogicSupport', {
+    value: viewAsyncValidateHookOptions().enable,
+    writable: false
+  });
   /**
     observable to monitor flow in logic
     */
-
 
   mw.monitor$ = monitor$;
   /**

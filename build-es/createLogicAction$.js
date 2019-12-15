@@ -219,6 +219,15 @@ export default function createLogicAction$(_ref) {
               dispatch$: dispatch$,
               name: name
             });
+
+            if (readyForProcessPromise && !dispatch$.isStopped) {
+              // process fn still uses dispatch asynchronously until done is called or infinite
+              monitor$.next({
+                action: action,
+                op: 'dispFuture',
+                name: name
+              });
+            }
           }
         });
       } else {

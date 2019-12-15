@@ -6766,6 +6766,15 @@ function createLogicAction$(_ref) {
               dispatch$: dispatch$,
               name: name
             });
+
+            if (readyForProcessPromise && !dispatch$.isStopped) {
+              // process fn still uses dispatch asynchronously until done is called or infinite
+              monitor$.next({
+                action: action,
+                op: 'dispFuture',
+                name: name
+              });
+            }
           }
         });
       } else {
@@ -6946,6 +6955,12 @@ function createPendingMonitor(_ref) {
 
         break;
 
+      case 'dispFuture':
+        // exit from process hook, but still uses dispatch asynchronously
+        pending -= 1; // no immediate logic end, then compensate this
+
+        break;
+
       case 'end':
         // completed from a logic
         pending -= 1;
@@ -7029,7 +7044,7 @@ function createReadyForProcessPromise(_ref2) {
       complete: function complete() {
         if (showTrace) {
           // eslint-disable-next-line no-console
-          console.log('readyForProcess$ complete', 'instance:', instance, 'result:', result);
+          console.log('readyForProcess$ complete', 'instance:', instance, 'skip process:', result);
         }
 
         resolve(result);
@@ -7205,6 +7220,17 @@ function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
             name: name,
             processFn: processFn
           });
+
+          if (readyForProcessPromise && !dispatch$.isStopped) {
+            // process fn still uses dispatch asynchronously until done is called or infinite
+            monitor$.next({
+              action: action,
+              op: 'dispFuture',
+              name: name
+            });
+          }
+        } else {
+          dispatch$.complete();
         }
       });
     });
@@ -7468,10 +7494,14 @@ function createLogicMiddleware() {
       };
     };
   }
+
+  Object.defineProperty(mw, 'advancedAsyncLogicSupport', {
+    value: viewAsyncValidateHookOptions().enable,
+    writable: false
+  });
   /**
     observable to monitor flow in logic
     */
-
 
   mw.monitor$ = monitor$;
   /**

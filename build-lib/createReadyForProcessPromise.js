@@ -105,6 +105,12 @@ function createPendingMonitor(_ref) {
 
         break;
 
+      case 'dispFuture':
+        // exit from process hook, but still uses dispatch asynchronously
+        pending -= 1; // no immediate logic end, then compensate this
+
+        break;
+
       case 'end':
         // completed from a logic
         pending -= 1;
@@ -188,7 +194,7 @@ function createReadyForProcessPromise(_ref2) {
       complete: function complete() {
         if (showTrace) {
           // eslint-disable-next-line no-console
-          console.log('readyForProcess$ complete', 'instance:', instance, 'result:', result);
+          console.log('readyForProcess$ complete', 'instance:', instance, 'skip process:', result);
         }
 
         resolve(result);
