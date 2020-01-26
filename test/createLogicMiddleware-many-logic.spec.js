@@ -2,14 +2,16 @@ import expect from 'expect-legacy';
 import range from 'lodash/fp/range';
 import { applyMiddleware, createStore } from 'redux';
 import { createLogic, createLogicMiddleware } from '../src/index';
+import { viewAsyncValidateHookOptions } from '../src/createLogicMiddleware';
+
 
 describe('createLogicMiddleware-many-logic', () => {
   describe('with validate and process', () => {
-    const NUM_LOGICS = 185; // 230 with cancel optimization
+    const NUM_LOGICS = viewAsyncValidateHookOptions().enable ? 165 : 185; // 230 with cancel optimization
     let mw;
     let store;
 
-    beforeEach((bDone) => {
+    before((bDone) => {
       const arrLogic = range(0, NUM_LOGICS).map(() => createLogic({
         type: 'foo',
         validate({ action }, allow) {
@@ -41,8 +43,8 @@ describe('createLogicMiddleware-many-logic', () => {
         }
       };
       store = createStore(reducer, undefined, applyMiddleware(mw));
-      store.dispatch({ type: 'foo', validates: 0 });
       mw.whenComplete(bDone);
+      store.dispatch({ type: 'foo', validates: 0 });
     });
 
     it('expect state to be updated', () => {
@@ -51,7 +53,7 @@ describe('createLogicMiddleware-many-logic', () => {
   });
 
   describe('with validate', () => {
-    const NUM_LOGICS = 220; // 370 with cancel optimization
+    const NUM_LOGICS = viewAsyncValidateHookOptions().enable ? 220 : 220; // 370 with cancel optimization
     let mw;
     let store;
 
@@ -78,8 +80,8 @@ describe('createLogicMiddleware-many-logic', () => {
         }
       };
       store = createStore(reducer, undefined, applyMiddleware(mw));
-      store.dispatch({ type: 'foo', validates: 0 });
       mw.whenComplete(bDone);
+      store.dispatch({ type: 'foo', validates: 0 });
     });
 
     it('expect state to be updated', () => {
@@ -90,11 +92,11 @@ describe('createLogicMiddleware-many-logic', () => {
   describe('with process', () => {
     // single-test 240, with mergeMapOrTap 450
     // full suite 350, with mergeMapOrTap 540
-    const NUM_LOGICS = 280; // 350 with optimizations
+    const NUM_LOGICS = viewAsyncValidateHookOptions().enable ? 210 : 280; // 350 with optimizations
     let mw;
     let store;
 
-    beforeEach(bDone => {
+    before(bDone => {
       const arrLogic = range(0, NUM_LOGICS).map(() => createLogic({
         type: 'foo',
         process({ action }, dispatch, done) {
@@ -120,8 +122,8 @@ describe('createLogicMiddleware-many-logic', () => {
         }
       };
       store = createStore(reducer, undefined, applyMiddleware(mw));
-      store.dispatch({ type: 'foo', validates: 0 });
       mw.whenComplete(bDone);
+      store.dispatch({ type: 'foo', validates: 0 });
     });
 
     it('expect state to be updated', () => {
