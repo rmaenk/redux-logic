@@ -2096,7 +2096,7 @@ describe('createLogicMiddleware-process', () => {
 
   });
 
-  describe('[logicA] process failType=BAZ throw error', () => {
+  describe('[logicA] process failType=BAZ throw error(my error)', () => {
     let monArr = [];
     let mw;
     let logicA;
@@ -5002,7 +5002,7 @@ describe('createLogicMiddleware-process', () => {
 
  });
 
-  describe('[logicA] process failType=BAZ throw error', () => {
+  describe('[logicA] process failType=BAZ throw error(dog)', () => {
     let monArr = [];
     let mw;
     let logicA;
