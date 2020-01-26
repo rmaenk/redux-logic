@@ -1,12 +1,12 @@
 import { merge, asapScheduler } from 'rxjs';
-import { debounceTime, filter, mergeMap, share, tap, throttleTime, scan } from 'rxjs/operators';
+import { debounceTime, filter, mergeMap, share, tap, throttleTime, scan, first } from 'rxjs/operators';
 import createLogicAction$ from './createLogicAction$';
 import { identityFn } from './utils';
 import createDispatch from './createDispatch';
 import execProcessFn from './execProcessFn';
 import createCancelled$ from './createCancelled$';
 import createDepObject from './createDepObject';
-import createReadyForProcessPromise from './createReadyForProcessPromise';
+import createReadyForProcess from './createReadyForProcessPromise';
 
 const MATCH_ALL_TYPES = '*';
 
@@ -37,16 +37,14 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
     const mergeMapOrTap =
       (hasIntercept) ?
         mergeMap(action => {
-          var readyForProcessPromise =
-            createReadyForProcessPromise({ action, logic, monitor$, asyncValidateHookOptions });
           return createLogicAction$({
-            action, logic, store, deps, cancel$, monitor$, action$, readyForProcessPromise
+            action, logic, store, deps, cancel$, monitor$, action$, asyncValidateHookOptions
           });
         }) :
         tap(action => {
           // create promise before monitor$.next calls!
-          var readyForProcessPromise =
-            createReadyForProcessPromise({ action, logic, monitor$, asyncValidateHookOptions });
+          var execWhenReady = 
+            createReadyForProcess({ action, logic, monitor$, asyncValidateHookOptions }).execWhenReady;
           // mimic the events as if went through createLogicAction$
           // also in createLogicAction$
           monitor$.next({ action, name, op: 'begin' });
@@ -58,30 +56,37 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
           const ctx = {}; // no intercept, so empty ctx;
           const depObj = createDepObject({ deps, cancelled$, ctx, getState, action, action$ });
 
-          function execWhenReady(fn) {
-            const isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
-            if (isReady) {
-              asapScheduler.schedule(() => {
-                fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
-              });
-            } else {
-              readyForProcessPromise.then((skip) => {
-                fn(skip);
-              });
-            }
-          }
-          execWhenReady((skip) => {
+
+
+
+
+
+
+
+
+
+
+
+
+          const isAsyncValidateHookEnabled = asyncValidateHookOptions.enable;
+          const fn = (skip) => {
             setInterceptComplete();
             if (!skip) {
               execProcessFn({ depObj, dispatch, dispatch$, dispatchReturn, done, name, processFn });
-              if (readyForProcessPromise && !dispatch$.isStopped) {
+              if (isAsyncValidateHookEnabled && !dispatch$.isStopped) {
                 // process fn still uses dispatch asynchronously until done is called or infinite
                 monitor$.next({ action, op: 'dispFuture', name });
               }
             } else {
               dispatch$.complete();
             }
-          });
+          };
+
+          if (isAsyncValidateHookEnabled) {
+            execWhenReady(fn);
+          } else {
+            asapScheduler.schedule(() => execWhenReady(fn));
+          }
         });
 
     function notifyIfExcluded(rxop, notifyCallback) {

@@ -443,125 +443,159 @@ describe('createLogicMiddleware-integration', () => {
   });
 
   describe('sequential dispatches of actions from logic process then handled by other logics', () => {
-    const asyncValidateHookOptions =  viewAsyncValidateHookOptions();
-    let storeUpdates;
-    let monArr = [];
-    const actionStart = { type: 'START'};
-    const actionOne = { type: 'ONE'};
-    const actionTwo = { type: 'TWO'};
-    const actionBarOne = { type: 'BAR1'};
-    const actionBarTwo = { type: 'BAR2'};
-    before((bDone) => {
-      monArr = [];
-      storeUpdates = [];
-      const initialState = { foo: 0, one: 0, two: 0, barOne: 0, barTwo: 0 };
+    const asyncValidateHookOptions = viewAsyncValidateHookOptions();
+    const actionStart = { type: 'START' };
+    const actionOne = { type: 'ONE' };
+    const actionTwo = { type: 'TWO' };
+    const actionBarOne = { type: 'BAR1' };
+    const actionBarTwo = { type: 'BAR2' };
+    const tests = [
+      {
+        title: 'both with process hooks only',
+        validate1: undefined,
+        validate2: undefined
+      },
+      {
+        title: 'first with validate=allow, second with process hook only',
+        validate1: ({ action }, allow) => { allow(action); },
+        validate2: undefined
+      },
+      {
+        title: 'first with process hook only, second with with validate=allow',
+        validate1: undefined,
+        validate2: ({ action }, allow) => { allow(action); }
+      },
+      {
+        title: 'both with validate=allow',
+        validate1: ({ action }, allow) => { allow(action); },
+        validate2: ({ action }, allow) => { allow(action); }
+      },
+    ];
+    tests.forEach(test => {
+      describe(`${test.title}`, () => {
+        let storeUpdates = [];
+        let monArr = [];
+        before((bDone) => {
+          monArr = [];
+          storeUpdates = [];
+          const initialState = { foo: 0, one: 0, two: 0, barOne: 0, barTwo: 0 };
 
-      function reducer(state, action) {
-        switch (action.type) {
-          case 'FOO':
-            return { ...state, foo: state.foo + 1 };
-          case 'ONE':
-            return { ...state, one: state.one + 1 };
-          case 'TWO':
-            return { ...state, two: state.two + 1 };
-          case 'BAR1':
-            return { ...state, barOne: state.barOne + 1 };
-          case 'BAR2':
-            return { ...state, barTwo: state.barTwo + 1 };
-          default:
-            return state;
-        }
-      }
+          function reducer(state, action) {
+            switch (action.type) {
+              case 'FOO':
+                return { ...state, foo: state.foo + 1 };
+              case 'ONE':
+                return { ...state, one: state.one + 1 };
+              case 'TWO':
+                return { ...state, two: state.two + 1 };
+              case 'BAR1':
+                return { ...state, barOne: state.barOne + 1 };
+              case 'BAR2':
+                return { ...state, barTwo: state.barTwo + 1 };
+              default:
+                return state;
+            }
+          }
 
-      const logicA = createLogic({
-        type: 'FOO',
-        name: 'logicA',
-        validate({ action }, allow) {
-          allow(action);
-        },
-        process(deps, dispatch, done) {
-          dispatch(actionOne);
-          dispatch(actionTwo);
-          done();
-        }
-      });
-      const logic1 = createLogic({
-        type: 'ONE',
-        name: 'logic1',
-        validate({ action }, allow) {
-          allow(action);
-        },
-        process(deps, dispatch, done) {
-          dispatch(actionBarOne);
-          done();
-        }
-      });
-      const logic2 = createLogic({
-        type: 'TWO',
-        name: 'logic2',
-        validate({ action }, allow) {
-          allow(action);
-        },
-        process(deps, dispatch, done) {
-          dispatch(actionBarTwo);
-          done();
-        }
-      });
+          const logicA = createLogic({
+            type: 'FOO',
+            name: 'logicA',
+            validate({ action }, allow) {
+              allow(action);
+            },
+            process(deps, dispatch, done) {
+              dispatch(actionOne);
+              dispatch(actionTwo);
+              done();
+            }
+          });
+          const logic1 = createLogic({
+            type: 'ONE',
+            name: 'logic1',
+            validate: test.validate1,
+            process(deps, dispatch, done) {
+              dispatch(actionBarOne);
+              done();
+            }
+          });
+          const logic2 = createLogic({
+            type: 'TWO',
+            name: 'logic2',
+            validate: test.validate2,
+            process(deps, dispatch, done) {
+              dispatch(actionBarTwo);
+              done();
+            }
+          });
 
-      const logicMiddleware = createLogicMiddleware([logicA, logic1, logic2]);
-      logicMiddleware.monitor$.subscribe(x => monArr.push(x));
-      const store = createStore(reducer, initialState, applyMiddleware(logicMiddleware));
-      store.subscribe(() => {
-        storeUpdates.push({
-          ...store.getState()
+          const logicMiddleware = createLogicMiddleware([logicA, logic1, logic2]);
+          logicMiddleware.monitor$.subscribe(x => monArr.push(x));
+          const store = createStore(reducer, initialState, applyMiddleware(logicMiddleware));
+          store.subscribe(() => {
+            storeUpdates.push({
+              ...store.getState()
+            });
+            if (storeUpdates.length === 2) {
+              // bDone();
+              // using whenComplete to trigger bDone
+            }
+          });
+
+          store.dispatch({ type: 'FOO' });
+          // we could just call bDone() here since everything is sync
+          // but whenComplete is always the safe thing to do
+          logicMiddleware.whenComplete(bDone);
         });
-        if (storeUpdates.length === 2) {
-          // bDone();
-          // using whenComplete to trigger bDone
-        }
-      });
 
-      store.dispatch({ type: 'FOO' });
-      // we could just call bDone() here since everything is sync
-      // but whenComplete is always the safe thing to do
-      logicMiddleware.whenComplete(bDone);
-    });
+        it('should update store in order: foo, one, bar1, two, bar2',
+          () => {
+            expect(storeUpdates.length).toBe(5);
+            expect(storeUpdates).toEqual([
+              { foo: 1, one: 0, two: 0, barOne: 0, barTwo: 0 },
+              { foo: 1, one: 1, two: 0, barOne: 0, barTwo: 0 },
+              { foo: 1, one: 1, two: 0, barOne: 1, barTwo: 0 },
+              { foo: 1, one: 1, two: 1, barOne: 1, barTwo: 0 },
+              { foo: 1, one: 1, two: 1, barOne: 1, barTwo: 1 }
+            ]);
+          });
 
-    it('mw.monitor$ should track flow', () => {
-      expect(monArr).toEqual([
-        { action: { type: 'FOO' }, /* */op: 'top' },
-        { action: { type: 'FOO' }, /* */op: 'begin', name: 'logicA' },
-        { action: { type: 'FOO' }, /* */op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
-        { /*                          */op: 'bottom', nextAction: { type: 'FOO' } },
-        { action: { type: 'FOO' }, /* */op: 'dispatch', dispAction: { type: 'ONE' } },
-        //------------------------------------------------------------
-        { action: { type: 'ONE' }, /* */op: 'top' },
-        { action: { type: 'ONE' }, /* */op: 'begin', name: 'logic1' },
-        { action: { type: 'ONE' }, /* */op: 'next', name: 'logic1', nextAction: { type: 'ONE' }, shouldProcess: true },
-        { /*                          */op: 'bottom', nextAction: { type: 'ONE' } },
+        it('mw.monitor$ should track flow', () => {
+          expect(monArr).toEqual([
+            { action: { type: 'FOO' }, /* */op: 'top' },
+            { action: { type: 'FOO' }, /* */op: 'begin', name: 'logicA' },
+            { action: { type: 'FOO' }, /* */op: 'next', name: 'logicA', nextAction: { type: 'FOO' }, shouldProcess: true },
+            { /*                          */op: 'bottom', nextAction: { type: 'FOO' } },
+            { action: { type: 'FOO' }, /* */op: 'dispatch', dispAction: { type: 'ONE' } },
+            //------------------------------------------------------------
+            { action: { type: 'ONE' }, /* */op: 'top' },
+            { action: { type: 'ONE' }, /* */op: 'begin', name: 'logic1' },
+            { action: { type: 'ONE' }, /* */op: 'next', name: 'logic1', nextAction: { type: 'ONE' }, shouldProcess: true },
+            { /*                          */op: 'bottom', nextAction: { type: 'ONE' } },
 
-        { action: { type: 'ONE' }, /* */op: 'dispatch', dispAction: { type: 'BAR1' } },
+            { action: { type: 'ONE' }, /* */op: 'dispatch', dispAction: { type: 'BAR1' } },
 
-        { action: { type: 'BAR1' }, /**/op: 'top' },
-        { /*                          */op: 'bottom', nextAction: { type: 'BAR1' } },
-        { action: { type: 'ONE' }, /* */op: 'end', name: 'logic1' },
-        //------------------------------------------------------------
-        { action: { type: 'FOO' }, /* */op: 'dispatch', dispAction: { type: 'TWO' } },
-        //------------------------------------------------------------
-        { action: { type: 'TWO' }, /* */op: 'top' },
-        { action: { type: 'TWO' }, /* */op: 'begin', name: 'logic2' },
-        { action: { type: 'TWO' }, /* */op: 'next', name: 'logic2', nextAction: { type: 'TWO' }, shouldProcess: true },
-        { /*                          */op: 'bottom', nextAction: { type: 'TWO' } },
+            { action: { type: 'BAR1' }, /**/op: 'top' },
+            { /*                          */op: 'bottom', nextAction: { type: 'BAR1' } },
+            { action: { type: 'ONE' }, /* */op: 'end', name: 'logic1' },
+            //------------------------------------------------------------
+            { action: { type: 'FOO' }, /* */op: 'dispatch', dispAction: { type: 'TWO' } },
+            //------------------------------------------------------------
+            { action: { type: 'TWO' }, /* */op: 'top' },
+            { action: { type: 'TWO' }, /* */op: 'begin', name: 'logic2' },
+            { action: { type: 'TWO' }, /* */op: 'next', name: 'logic2', nextAction: { type: 'TWO' }, shouldProcess: true },
+            { /*                          */op: 'bottom', nextAction: { type: 'TWO' } },
 
-        { action: { type: 'TWO' }, /* */op: 'dispatch', dispAction: { type: 'BAR2' } },
+            { action: { type: 'TWO' }, /* */op: 'dispatch', dispAction: { type: 'BAR2' } },
 
-        { action: { type: 'BAR2' }, /**/op: 'top' },
-        { /*                          */op: 'bottom', nextAction: { type: 'BAR2' } },
-        { action: { type: 'TWO' }, /* */op: 'end', name: 'logic2' },
-        //------------------------------------------------------------
-        { action: { type: 'FOO' }, /* */op: 'end', name: 'logicA' }
-      ]);
-    });
+            { action: { type: 'BAR2' }, /**/op: 'top' },
+            { /*                          */op: 'bottom', nextAction: { type: 'BAR2' } },
+            { action: { type: 'TWO' }, /* */op: 'end', name: 'logic2' },
+            //------------------------------------------------------------
+            { action: { type: 'FOO' }, /* */op: 'end', name: 'logicA' }
+          ]);
+        });
+      });// describe
+    });// test cycle
   });
 
   describe('rapid call with 2 logic', () => {

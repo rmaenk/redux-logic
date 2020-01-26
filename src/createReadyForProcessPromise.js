@@ -76,55 +76,55 @@ function createPendingMonitor({
   );
 }
 
-export default function createReadyForProcessPromise({
+export default function createReadyForProcess({
   action, logic, monitor$, asyncValidateHookOptions }) {
-  if (!asyncValidateHookOptions.enable) return null;
-
-  const instance = Date.now();
-
-  const reverseOrderOfProcessHooks = !asyncValidateHookOptions.enable
-    || !asyncValidateHookOptions.directOrderOfProcessHooks;
-  const pendingMonitor$ =
-    createPendingMonitor({
-      act: action, logicName: logic.name, monitor$, instance, reverseOrderOfProcessHooks
-    });
-
-  const showTrace = false;
-  if (showTrace) {
-    // eslint-disable-next-line no-console
-    console.log('-->',
-      'pending monitor created,', 'instance:', instance, logic.name,
-      '\n\ttime:', new Date(instance).toISOString(),
-      '\n\taction:', JSON.stringify(action),
-      '\n\tlogic:', JSON.stringify(logic),
-      '<--');
-
-    // eslint-disable-next-line no-console
-    console.log('-->',
-      'pending:', 1, 'instance=', instance, logic.name,
-      '\n\ttime:', new Date(instance).toISOString(),
-      '\n\top: top',
-      '\n\taction is already on stack top (pending=1).',
-      '<--');
-  }
-  const readyForProcess$ = pendingMonitor$.pipe(
-    ...[
-      // eslint-disable-next-line no-console
-      showTrace ? tap(x => console.log('-->',
-        'pending:', x.pending, 'instance=', instance, logic.name,
-        '\n\top:', x.op,
-        '\n\ttime:', new Date(instance).toISOString(),
-        '\n\tentry:', JSON.stringify(x),
-        '<--')) : null,
-
-      first(x => x.pending <= 0 || x.stop)
-    ].filter(identityFn)
-  );
-
-  let resolved = false;
-  let rejected = false;
+  let completed = false;
+  let failed = false;
   let result = false;
-  const readyForProcessPromise = new Promise((resolve, reject) => {
+  const delayedFnList = [];
+
+  if (asyncValidateHookOptions.enable) {
+    const instance = Date.now();
+
+    const reverseOrderOfProcessHooks = !asyncValidateHookOptions.enable
+      || !asyncValidateHookOptions.directOrderOfProcessHooks;
+    const pendingMonitor$ =
+      createPendingMonitor({
+        act: action, logicName: logic.name, monitor$, instance, reverseOrderOfProcessHooks
+      });
+
+    const showTrace = false;
+    if (showTrace) {
+      // eslint-disable-next-line no-console
+      console.log('-->',
+        'pending monitor created,', 'instance:', instance, logic.name,
+        '\n\ttime:', new Date(instance).toISOString(),
+        '\n\taction:', JSON.stringify(action),
+        '\n\tlogic:', JSON.stringify(logic),
+        '<--');
+
+      // eslint-disable-next-line no-console
+      console.log('-->',
+        'pending:', 1, 'instance=', instance, logic.name,
+        '\n\ttime:', new Date(instance).toISOString(),
+        '\n\top: top',
+        '\n\taction is already on stack top (pending=1).',
+        '<--');
+    }
+    const readyForProcess$ = pendingMonitor$.pipe(
+      ...[
+        // eslint-disable-next-line no-console
+        showTrace ? tap(x => console.log('-->',
+          'pending:', x.pending, 'instance=', instance, logic.name,
+          '\n\top:', x.op,
+          '\n\ttime:', new Date(instance).toISOString(),
+          '\n\tentry:', JSON.stringify(x),
+          '<--')) : null,
+
+        first(x => x.pending <= 0 || x.stop)
+      ].filter(identityFn)
+    );
+
     const sub = readyForProcess$.subscribe({
       next(x) {
         result = x.stop;
@@ -134,25 +134,49 @@ export default function createReadyForProcessPromise({
           // eslint-disable-next-line no-console
           console.log('readyForProcess$ error', 'instance:', instance, err);
         }
-        reject(err);
-        rejected = true;
+        failed = true;
         result = err;
         sub.unsubscribe();
+        delayedFnList = undefined;
       },
       complete() {
         if (showTrace) {
           // eslint-disable-next-line no-console
           console.log('readyForProcess$ complete', 'instance:', instance, 'skip process:', result);
         }
-        resolve(result);
-        resolved = true;
+        completed = true;
         sub.unsubscribe();
+
+        while (delayedFnList && delayedFnList.length) {
+          const fn = delayedFnList.shift();
+          if (fn) {
+            fn(result);
+          }
+        }
       }
     });
-  });
-  readyForProcessPromise.isResolved = () => resolved;
-  readyForProcessPromise.isRejected = () => rejected;
-  readyForProcessPromise.isFulfilled = () => resolved || rejected;
-  readyForProcessPromise.getResult = () => result;
-  return readyForProcessPromise;
+  }
+  return {
+    /**
+     * Callback parameter of the execWhenReady function.
+     * @callback execWhenReadyCallback
+     * @param {boolean|undefined} skip
+     */
+
+    /**
+    * Executes a fn callback asynchronously based on readyForProcess observable.
+    * If promise is not defined or null then the callback is executed synchronously.
+    * @param {execWhenReadyCallback} fn callback
+    * @returns {void}
+    */
+    execWhenReady: (fn) => {
+      const isReady = !asyncValidateHookOptions.enable || completed;
+      if (isReady) {
+        fn(asyncValidateHookOptions.enable ? result : false);
+      } else {
+        if (failed) throw Error(result);
+        delayedFnList.push(fn);
+      }
+    }
+  };
 }

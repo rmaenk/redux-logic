@@ -5,15 +5,39 @@ import createDepObject from './createDepObject';
 import execProcessFn from './execProcessFn';
 import createDispatch from './createDispatch';
 import createCancelled$ from './createCancelled$';
+import createReadyForProcess from './createReadyForProcessPromise';
 
 const debug = (/* ...args */) => {};
 
+/**
+ * Callback parameter of the execWhenReady function.
+ * @callback execWhenReadyCallback
+ * @param {boolean|undefined} skip
+ */
+
+ /**
+ * @typedef {Object} ParameterOfCreateLogicActionFn
+ * @property {any} action
+ * @property {any} logic
+ * @property {any} store
+ * @property {any} deps
+ * @property {Observable} cancel$
+ * @property {Observable} monitor$
+ * @property {Observable} action$
+ * @property {execWhenReadyCallback} execWhenReady
+ */
+
+/**
+* @param {ParameterOfCreateLogicActionFn} p
+* @returns {Observable}
+*/
 export default function createLogicAction$({ action, logic, store, deps,
-  cancel$, monitor$, action$, readyForProcessPromise }) {
+  cancel$, monitor$, action$, asyncValidateHookOptions }) {
   const { getState } = store;
   const { name, process: processFn, processOptions: { dispatchReturn,
     dispatchMultiple, successType, failType } } = logic;
   const intercept = logic.validate || logic.transform; // aliases
+  var execWhenReady = createReadyForProcess({ action, logic, monitor$, asyncValidateHookOptions }).execWhenReady;
 
   debug('createLogicAction$', name, action);
   monitor$.next({ action, name, op: 'begin' }); // also in logicWrapper
@@ -65,28 +89,6 @@ export default function createLogicAction$({ action, logic, store, deps,
       handleNextOrDispatch(false, act, options);
     }
 
-    /**
-     * Callback parameter of the execWhenReady function.
-     * @callback execWhenReadyCallback
-     * @param {boolean|undefined} skip
-     */
-
-    /**
-    * Executes a fn callback asynchronously based on readyForProcessPromise.
-    * If promise is not defined or null then the callback is executed synchronously.
-    * @param {execWhenReadyCallback} fn callback
-    * @returns {void}
-    */
-    function execWhenReady(fn) {
-      if (!fn) return;
-      const isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
-      if (isReady) {
-        fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
-      } else {
-        readyForProcessPromise.then((skip) => fn(skip));
-      }
-    }
-
     function handleNextOrDispatch(shouldProcess, act, options) {
       const shouldProcessAndHasProcessFn = shouldProcess && processFn;
       const { useDispatch } = applyAllowRejectNextDefaults(options);
@@ -120,7 +122,7 @@ export default function createLogicAction$({ action, logic, store, deps,
               depObj, dispatch, done, processFn,
               dispatchReturn, dispatch$, name
             });
-            if (readyForProcessPromise && !dispatch$.isStopped) {
+            if (asyncValidateHookOptions.enable && !dispatch$.isStopped) {
               // process fn still uses dispatch asynchronously until done is called or infinite
               monitor$.next({ action, op: 'dispFuture', name });
             }
