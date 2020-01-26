@@ -60,10 +60,10 @@ export default function createLogicMiddleware(arrLogic = [], deps = {}) {
   }
 
   const actionSrc$ = new Subject(); // mw action stream
-//  actionSrc$.subscribe(a => console.log("actionSrc$:",a));
+//  actionSrc$.subscribe(a => console.log("actionSrc$:", JSON.stringify(a)));
 
   const monitor$ = new Subject(); // monitor all activity
-//  monitor$.subscribe(x => console.log('monitor$:', x));
+//  monitor$.subscribe(x => console.log('monitor$:', JSON.stringify(x)));
 
   const lastPending$ = new BehaviorSubject({ op: OP_INIT });
   monitor$.pipe(
