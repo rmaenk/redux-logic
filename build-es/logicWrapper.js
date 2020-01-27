@@ -16,14 +16,14 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 import { merge, asapScheduler } from 'rxjs';
-import { debounceTime, filter, mergeMap, share, tap, throttleTime, scan } from 'rxjs/operators';
+import { debounceTime, filter, mergeMap, share, tap, throttleTime, scan, first } from 'rxjs/operators';
 import createLogicAction$ from './createLogicAction$';
 import { identityFn } from './utils';
 import createDispatch from './createDispatch';
 import execProcessFn from './execProcessFn';
 import createCancelled$ from './createCancelled$';
 import createDepObject from './createDepObject';
-import createReadyForProcessPromise from './createReadyForProcessPromise';
+import createReadyForProcess from './createReadyForProcessPromise';
 var MATCH_ALL_TYPES = '*';
 export default function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
   var name = logic.name,
@@ -47,12 +47,6 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
     // and just exec the processFn
 
     var mergeMapOrTap = hasIntercept ? mergeMap(function (action) {
-      var readyForProcessPromise = createReadyForProcessPromise({
-        action: action,
-        logic: logic,
-        monitor$: monitor$,
-        asyncValidateHookOptions: asyncValidateHookOptions
-      });
       return createLogicAction$({
         action: action,
         logic: logic,
@@ -61,16 +55,16 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
         cancel$: cancel$,
         monitor$: monitor$,
         action$: action$,
-        readyForProcessPromise: readyForProcessPromise
+        asyncValidateHookOptions: asyncValidateHookOptions
       });
     }) : tap(function (action) {
       // create promise before monitor$.next calls!
-      var readyForProcessPromise = createReadyForProcessPromise({
+      var execWhenReady = createReadyForProcess({
         action: action,
         logic: logic,
         monitor$: monitor$,
         asyncValidateHookOptions: asyncValidateHookOptions
-      }); // mimic the events as if went through createLogicAction$
+      }).execWhenReady; // mimic the events as if went through createLogicAction$
       // also in createLogicAction$
 
       monitor$.next({
@@ -117,22 +111,9 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
         action: action,
         action$: action$
       });
+      var isAsyncValidateHookEnabled = asyncValidateHookOptions.enable;
 
-      function execWhenReady(fn) {
-        var isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
-
-        if (isReady) {
-          asapScheduler.schedule(function () {
-            fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
-          });
-        } else {
-          readyForProcessPromise.then(function (skip) {
-            fn(skip);
-          });
-        }
-      }
-
-      execWhenReady(function (skip) {
+      var fn = function fn(skip) {
         setInterceptComplete();
 
         if (!skip) {
@@ -146,7 +127,7 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
             processFn: processFn
           });
 
-          if (readyForProcessPromise && !dispatch$.isStopped) {
+          if (isAsyncValidateHookEnabled && !dispatch$.isStopped) {
             // process fn still uses dispatch asynchronously until done is called or infinite
             monitor$.next({
               action: action,
@@ -157,7 +138,15 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
         } else {
           dispatch$.complete();
         }
-      });
+      };
+
+      if (isAsyncValidateHookEnabled) {
+        execWhenReady(fn);
+      } else {
+        asapScheduler.schedule(function () {
+          return execWhenReady(fn);
+        });
+      }
     });
 
     function notifyIfExcluded(rxop, notifyCallback) {

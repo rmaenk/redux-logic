@@ -71,12 +71,6 @@ function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
     // and just exec the processFn
 
     var mergeMapOrTap = hasIntercept ? (0, _operators.mergeMap)(function (action) {
-      var readyForProcessPromise = (0, _createReadyForProcessPromise.default)({
-        action: action,
-        logic: logic,
-        monitor$: monitor$,
-        asyncValidateHookOptions: asyncValidateHookOptions
-      });
       return (0, _createLogicAction$.default)({
         action: action,
         logic: logic,
@@ -85,16 +79,16 @@ function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
         cancel$: cancel$,
         monitor$: monitor$,
         action$: action$,
-        readyForProcessPromise: readyForProcessPromise
+        asyncValidateHookOptions: asyncValidateHookOptions
       });
     }) : (0, _operators.tap)(function (action) {
       // create promise before monitor$.next calls!
-      var readyForProcessPromise = (0, _createReadyForProcessPromise.default)({
+      var execWhenReady = (0, _createReadyForProcessPromise.default)({
         action: action,
         logic: logic,
         monitor$: monitor$,
         asyncValidateHookOptions: asyncValidateHookOptions
-      }); // mimic the events as if went through createLogicAction$
+      }).execWhenReady; // mimic the events as if went through createLogicAction$
       // also in createLogicAction$
 
       monitor$.next({
@@ -141,22 +135,9 @@ function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
         action: action,
         action$: action$
       });
+      var isAsyncValidateHookEnabled = asyncValidateHookOptions.enable;
 
-      function execWhenReady(fn) {
-        var isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
-
-        if (isReady) {
-          _rxjs.asapScheduler.schedule(function () {
-            fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
-          });
-        } else {
-          readyForProcessPromise.then(function (skip) {
-            fn(skip);
-          });
-        }
-      }
-
-      execWhenReady(function (skip) {
+      var fn = function fn(skip) {
         setInterceptComplete();
 
         if (!skip) {
@@ -170,7 +151,7 @@ function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
             processFn: processFn
           });
 
-          if (readyForProcessPromise && !dispatch$.isStopped) {
+          if (isAsyncValidateHookEnabled && !dispatch$.isStopped) {
             // process fn still uses dispatch asynchronously until done is called or infinite
             monitor$.next({
               action: action,
@@ -181,7 +162,15 @@ function logicWrapper(logic, store, deps, monitor$, asyncValidateHookOptions) {
         } else {
           dispatch$.complete();
         }
-      });
+      };
+
+      if (isAsyncValidateHookEnabled) {
+        execWhenReady(fn);
+      } else {
+        _rxjs.asapScheduler.schedule(function () {
+          return execWhenReady(fn);
+        });
+      }
     });
 
     function notifyIfExcluded(rxop, notifyCallback) {

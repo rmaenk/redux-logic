@@ -110,10 +110,10 @@ function createLogicMiddleware() {
   }
 
   var actionSrc$ = new _rxjs.Subject(); // mw action stream
-  //  actionSrc$.subscribe(a => console.log("actionSrc$:",a));
+  //  actionSrc$.subscribe(a => console.log("actionSrc$:", JSON.stringify(a)));
 
   var monitor$ = new _rxjs.Subject(); // monitor all activity
-  //  monitor$.subscribe(x => console.log('monitor$:', x));
+  //  monitor$.subscribe(x => console.log('monitor$:', JSON.stringify(x)));
 
   var lastPending$ = new _rxjs.BehaviorSubject({
     op: OP_INIT

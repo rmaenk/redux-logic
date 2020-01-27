@@ -26,10 +26,34 @@ import createDepObject from './createDepObject';
 import execProcessFn from './execProcessFn';
 import createDispatch from './createDispatch';
 import createCancelled$ from './createCancelled$';
+import createReadyForProcess from './createReadyForProcessPromise';
 
 var debug = function debug()
 /* ...args */
 {};
+/**
+ * Callback parameter of the execWhenReady function.
+ * @callback execWhenReadyCallback
+ * @param {boolean|undefined} skip
+ */
+
+/**
+* @typedef {Object} ParameterOfCreateLogicActionFn
+* @property {any} action
+* @property {any} logic
+* @property {any} store
+* @property {any} deps
+* @property {Observable} cancel$
+* @property {Observable} monitor$
+* @property {Observable} action$
+* @property {execWhenReadyCallback} execWhenReady
+*/
+
+/**
+* @param {ParameterOfCreateLogicActionFn} p parameters
+* @returns {Observable} logic action observable
+*/
+
 
 export default function createLogicAction$(_ref) {
   var _Observable$create;
@@ -41,7 +65,7 @@ export default function createLogicAction$(_ref) {
       cancel$ = _ref.cancel$,
       monitor$ = _ref.monitor$,
       action$ = _ref.action$,
-      readyForProcessPromise = _ref.readyForProcessPromise;
+      asyncValidateHookOptions = _ref.asyncValidateHookOptions;
   var getState = store.getState;
   var name = logic.name,
       processFn = logic.process,
@@ -52,6 +76,12 @@ export default function createLogicAction$(_ref) {
       failType = _logic$processOptions.failType;
   var intercept = logic.validate || logic.transform; // aliases
 
+  var execWhenReady = createReadyForProcess({
+    action: action,
+    logic: logic,
+    monitor$: monitor$,
+    asyncValidateHookOptions: asyncValidateHookOptions
+  }).execWhenReady;
   debug('createLogicAction$', name, action);
   monitor$.next({
     action: action,
@@ -128,32 +158,6 @@ export default function createLogicAction$(_ref) {
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : AllowRejectNextDefaults;
       handleNextOrDispatch(false, act, options);
     }
-    /**
-     * Callback parameter of the execWhenReady function.
-     * @callback execWhenReadyCallback
-     * @param {boolean|undefined} skip
-     */
-
-    /**
-    * Executes a fn callback asynchronously based on readyForProcessPromise.
-    * If promise is not defined or null then the callback is executed synchronously.
-    * @param {execWhenReadyCallback} fn callback
-    * @returns {void}
-    */
-
-
-    function execWhenReady(fn) {
-      if (!fn) return;
-      var isReady = !readyForProcessPromise || readyForProcessPromise.isResolved();
-
-      if (isReady) {
-        fn(readyForProcessPromise ? readyForProcessPromise.getResult() : false);
-      } else {
-        readyForProcessPromise.then(function (skip) {
-          return fn(skip);
-        });
-      }
-    }
 
     function handleNextOrDispatch(shouldProcess, act, options) {
       var shouldProcessAndHasProcessFn = shouldProcess && processFn;
@@ -220,7 +224,7 @@ export default function createLogicAction$(_ref) {
               name: name
             });
 
-            if (readyForProcessPromise && !dispatch$.isStopped) {
+            if (asyncValidateHookOptions.enable && !dispatch$.isStopped) {
               // process fn still uses dispatch asynchronously until done is called or infinite
               monitor$.next({
                 action: action,
