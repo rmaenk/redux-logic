@@ -81,7 +81,7 @@ export default function createReadyForProcess({
   let completed = false;
   let failed = false;
   let result = false;
-  const delayedFnList = [];
+  let delayedFnList = [];
 
   if (asyncValidateHookOptions.enable) {
     const instance = Date.now();

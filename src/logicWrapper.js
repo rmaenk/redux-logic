@@ -36,15 +36,14 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
     // and just exec the processFn
     const mergeMapOrTap =
       (hasIntercept) ?
-        mergeMap(action => {
-          return createLogicAction$({
-            action, logic, store, deps, cancel$, monitor$, action$, asyncValidateHookOptions
-          });
-        }) :
+        mergeMap(action => createLogicAction$({
+          action, logic, store, deps, cancel$, monitor$, action$, asyncValidateHookOptions
+        })) :
         tap(action => {
           // create promise before monitor$.next calls!
-          var execWhenReady = 
-            createReadyForProcess({ action, logic, monitor$, asyncValidateHookOptions }).execWhenReady;
+          var execWhenReady = createReadyForProcess({
+            action, logic, monitor$, asyncValidateHookOptions
+          }).execWhenReady;
           // mimic the events as if went through createLogicAction$
           // also in createLogicAction$
           monitor$.next({ action, name, op: 'begin' });
@@ -55,19 +54,6 @@ export default function logicWrapper(logic, store, deps, monitor$, asyncValidate
             action, cancel$, cancelled$, logic, monitor$, store });
           const ctx = {}; // no intercept, so empty ctx;
           const depObj = createDepObject({ deps, cancelled$, ctx, getState, action, action$ });
-
-
-
-
-
-
-
-
-
-
-
-
-
           const isAsyncValidateHookEnabled = asyncValidateHookOptions.enable;
           const fn = (skip) => {
             setInterceptComplete();

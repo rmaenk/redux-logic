@@ -7,7 +7,8 @@ import { viewAsyncValidateHookOptions } from '../src/createLogicMiddleware';
 
 describe('createLogicMiddleware-many-logic', () => {
   describe('with validate and process', () => {
-    const NUM_LOGICS = viewAsyncValidateHookOptions().enable ? 165 : 185; // 230 with cancel optimization
+    // 230 with cancel optimization
+    const NUM_LOGICS = viewAsyncValidateHookOptions().enable ? 165 : 185;
     let mw;
     let store;
 
@@ -53,7 +54,8 @@ describe('createLogicMiddleware-many-logic', () => {
   });
 
   describe('with validate', () => {
-    const NUM_LOGICS = viewAsyncValidateHookOptions().enable ? 220 : 220; // 370 with cancel optimization
+    // 370 with cancel optimization
+    const NUM_LOGICS = viewAsyncValidateHookOptions().enable ? 220 : 220;
     let mw;
     let store;
 

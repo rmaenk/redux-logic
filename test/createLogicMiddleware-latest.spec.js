@@ -559,7 +559,7 @@ describe('createLogicMiddleware-latest', () => {
         let logicA;
         let next;
         let dispatch;
-    
+
         beforeEach(bDone => {
           monArr = [];
           next = expect.createSpy();

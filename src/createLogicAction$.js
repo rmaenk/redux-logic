@@ -28,8 +28,8 @@ const debug = (/* ...args */) => {};
  */
 
 /**
-* @param {ParameterOfCreateLogicActionFn} p
-* @returns {Observable}
+* @param {ParameterOfCreateLogicActionFn} p parameters
+* @returns {Observable} logic action observable
 */
 export default function createLogicAction$({ action, logic, store, deps,
   cancel$, monitor$, action$, asyncValidateHookOptions }) {
@@ -37,7 +37,8 @@ export default function createLogicAction$({ action, logic, store, deps,
   const { name, process: processFn, processOptions: { dispatchReturn,
     dispatchMultiple, successType, failType } } = logic;
   const intercept = logic.validate || logic.transform; // aliases
-  var execWhenReady = createReadyForProcess({ action, logic, monitor$, asyncValidateHookOptions }).execWhenReady;
+  var execWhenReady =
+    createReadyForProcess({ action, logic, monitor$, asyncValidateHookOptions }).execWhenReady;
 
   debug('createLogicAction$', name, action);
   monitor$.next({ action, name, op: 'begin' }); // also in logicWrapper
